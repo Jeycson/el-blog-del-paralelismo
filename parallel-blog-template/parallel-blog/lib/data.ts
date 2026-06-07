@@ -1,0 +1,159 @@
+import { Article, HardwareSpec } from "@/types";
+
+export const PROJECT_META = {
+  title: "Computación Paralela & Sistemas Distribuidos",
+  shortTitle: "CompPar Lab",
+  institution: "Benemérita Universidad Autónoma de Puebla",
+  faculty: "Facultad de Ciencias de la Computación",
+  semester: "Primavera 2025",
+  mentor: {
+    name: "Dr. Eduardo Morales Ríos",
+    role: "Profesor Titular & Mentor de Investigación",
+  },
+  members: [
+    { name: "Jeycson Hernández", role: "Investigador Principal" },
+    { name: "Valeria Torres Cruz", role: "Investigadora" },
+    { name: "Marco A. Pérez Leal", role: "Investigador" },
+  ],
+  abstract:
+    "Este proyecto documenta una serie de experimentos controlados sobre el comportamiento de aplicaciones de cómputo intensivo bajo distintos paradigmas de paralelismo: SIMD, OpenMP, hilos POSIX y CPython. Evaluamos SpeedUp, eficiencia y overhead en entornos de hardware heterogéneo, con el objetivo de establecer métricas reproducibles y recomendaciones prácticas para el diseño de software de alto rendimiento.",
+  githubUrl: "https://github.com/comppar-buap/lab-parallel",
+};
+
+export const HARDWARE_SPECS: HardwareSpec[] = [
+  {
+    id: "env-a",
+    name: "Entorno A — Laptop Principal",
+    role: "laptop",
+    cpu: "Intel Core i7-12700H",
+    cores: 14,
+    threads: 20,
+    cacheL1: "48 KB (datos) × 14 núcleos",
+    cacheL2: "1.25 MB × 14 núcleos",
+    cacheL3: "24 MB compartida",
+    ram: "32 GB DDR5-4800",
+    os: "Ubuntu 22.04 LTS (kernel 6.5)",
+    notes: "Configurada con gobernador de CPU en modo performance.",
+  },
+  {
+    id: "env-b",
+    name: "Entorno B — Laptop Secundaria",
+    role: "laptop",
+    cpu: "AMD Ryzen 7 5800H",
+    cores: 8,
+    threads: 16,
+    cacheL1: "32 KB (datos) × 8 núcleos",
+    cacheL2: "512 KB × 8 núcleos",
+    cacheL3: "16 MB compartida",
+    ram: "16 GB DDR4-3200",
+    os: "Manjaro Linux 23.1 (kernel 6.6)",
+    notes: "SMT (Hyperthreading) habilitado durante todas las pruebas.",
+  },
+  {
+    id: "env-c",
+    name: "Entorno C — Servidor de Laboratorio",
+    role: "server",
+    cpu: "Intel Xeon E5-2690 v4 (×2 sockets)",
+    cores: 28,
+    threads: 56,
+    cacheL1: "32 KB × 28 núcleos",
+    cacheL2: "256 KB × 28 núcleos",
+    cacheL3: "35 MB compartida (por socket)",
+    ram: "128 GB DDR4 ECC Registered",
+    os: "Rocky Linux 9.3 (kernel 5.14)",
+    notes: "Servidor bare-metal, sin virtualización. NUMA de 2 nodos.",
+  },
+];
+
+export const ARTICLES: Article[] = [
+  {
+    slug: "caso-a-variacion-carga",
+    title: "Caso A: Variación de Carga de Trabajo",
+    subtitle:
+      "Impacto del tamaño del problema en el SpeedUp bajo OpenMP y vectorización SIMD",
+    category: "Análisis de Rendimiento",
+    tags: ["OpenMP", "SIMD", "AVX2", "Cache", "SpeedUp"],
+    authors: [
+      {
+        name: "Jeycson Hernández",
+        role: "Investigador Principal",
+        institution: "BUAP",
+      },
+      {
+        name: "Valeria Torres Cruz",
+        role: "Investigadora",
+        institution: "BUAP",
+      },
+    ],
+    date: "2025-03-15",
+    readingTime: 12,
+    abstract:
+      "Exploramos cómo el tamaño del vector de entrada afecta de manera no lineal el SpeedUp obtenido con paralelismo OpenMP y vectorización AVX2. Identificamos umbrales críticos donde el overhead de creación de hilos supera los beneficios del paralelismo.",
+    hardware: ["env-a", "env-b"],
+  },
+  {
+    slug: "caso-b-overhead-hilos",
+    title: "Caso B: Overhead de Creación de Hilos",
+    subtitle:
+      "Cuantificación del costo de pthread_create vs. thread pools en cargas variables",
+    category: "Sistemas de Hilos",
+    tags: ["POSIX Threads", "Thread Pool", "Latencia", "Overhead", "Linux"],
+    authors: [
+      {
+        name: "Marco A. Pérez Leal",
+        role: "Investigador",
+        institution: "BUAP",
+      },
+    ],
+    date: "2025-03-28",
+    readingTime: 9,
+    abstract:
+      "Medimos con nanosegundos de precisión el costo de creación, sincronización y destrucción de hilos POSIX frente a un pool pre-inicializado. Los resultados muestran diferencias de hasta 3× en cargas de trabajo de corta duración.",
+    hardware: ["env-a", "env-c"],
+  },
+  {
+    slug: "caso-c-gil-python",
+    title: "Caso C: GIL de Python y Cómputo Numérico",
+    subtitle:
+      "Por qué threading de CPython no escala y cuándo multiprocessing es la respuesta",
+    category: "Lenguajes de Alto Nivel",
+    tags: ["Python", "GIL", "multiprocessing", "NumPy", "Profiling"],
+    authors: [
+      {
+        name: "Valeria Torres Cruz",
+        role: "Investigadora",
+        institution: "BUAP",
+      },
+      {
+        name: "Marco A. Pérez Leal",
+        role: "Investigador",
+        institution: "BUAP",
+      },
+    ],
+    date: "2025-04-10",
+    readingTime: 14,
+    abstract:
+      "Un análisis riguroso del Global Interpreter Lock de CPython. Demostramos bajo qué condiciones el threading introduce regresiones de rendimiento y establecemos un árbol de decisión para elegir entre threading, multiprocessing y NumPy vectorizado.",
+    hardware: ["env-a", "env-b", "env-c"],
+  },
+  {
+    slug: "caso-d-cache-misses",
+    title: "Caso D: Fallos de Caché y Localidad de Datos",
+    subtitle:
+      "Análisis de acceso a memoria con perf y Valgrind/Cachegrind en algoritmos de álgebra lineal",
+    category: "Arquitectura de Memoria",
+    tags: ["Cache", "perf", "Cachegrind", "BLAS", "Localidad"],
+    authors: [
+      {
+        name: "Jeycson Hernández",
+        role: "Investigador Principal",
+        institution: "BUAP",
+      },
+    ],
+    date: "2025-04-22",
+    readingTime: 16,
+    abstract:
+      "Utilizamos perf stat y Cachegrind para perfilar la tasa de L1/L2/L3 cache misses en implementaciones naive vs. optimizadas de multiplicación de matrices. El tiling por bloques reduce las faltas de L3 hasta un 87%.",
+    hardware: ["env-a", "env-c"],
+  },
+];
