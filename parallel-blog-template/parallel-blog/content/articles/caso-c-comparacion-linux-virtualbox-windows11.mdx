@@ -1,0 +1,73 @@
+export const metadata = {
+  toc: [
+    { id: 'introduccion',              title: 'Introducción',              level: 1 },
+    { id: 'metodologia',               title: 'Metodología',               level: 1 },
+    { id: 'configuracion',             title: 'Configuración',             level: 2 },
+    { id: 'resultados',                title: 'Resultados',                level: 1 },
+    { id: 'categorizacion-de-tiempos', title: 'Categorización de tiempos', level: 2 },
+    { id: 'conclusiones',              title: 'Conclusiones',              level: 1 },
+  ]
+}
+
+<h2 id="introduccion">Introducción</h2>
+
+El análisis comparativo del rendimiento entre entornos de ejecución nativos y virtualizados constituye una línea de investigación fundamental en el campo de los sistemas operativos y la computación de alto rendimiento. Mientras que la virtualización ofrece ventajas significativas en términos de portabilidad, aislamiento y gestión de recursos, introduce una capa de abstracción entre el software y el hardware físico que inevitablemente impacta la latencia y la consistencia de los tiempos de ejecución.
+
+El presente reporte evalúa empíricamente el impacto de la virtualización sobre el rendimiento de un algoritmo de procesamiento de imágenes paralelizado mediante OpenMP. Para ello, se compara la ejecución del programa sobre Windows 11 en modo nativo contra su ejecución sobre Fedora Linux 43 alojado dentro de una máquina virtual VirtualBox. El objetivo es cuantificar el overhead introducido por el hipervisor de VirtualBox, identificar la variabilidad estadística de los tiempos bajo ambos entornos y contrastar las hipótesis planteadas por los integrantes del equipo con la evidencia experimental obtenida.
+
+<h2 id="metodologia">Metodología</h2>
+
+El diseño experimental se fundamenta en un análisis cuantitativo comparativo bajo un esquema de carga de trabajo constante, donde tanto el tamaño de la imagen como la configuración de hilos permanecen invariantes entre entornos, y únicamente se modifica el sistema operativo y el modo de ejecución (nativo vs. virtualizado). Esta estrategia permite aislar el efecto del hipervisor como variable independiente.
+
+Para mitigar la varianza estocástica introducida por factores externos del entorno de ejecución —procesos en segundo plano del sistema operativo, interrupciones de hardware y políticas de ahorro energético— se implementó un protocolo de muestreo estadístico basado en **100 réplicas independientes** por cada configuración. Los estimadores analizados para caracterizar la distribución de probabilidad del tiempo de ejecución (`T`) incluyen el tiempo promedio como métrica de tendencia central (T_promedio), el tiempo mínimo registrado como límite inferior (T_min) y el tiempo máximo registrado como peor escenario posible (T_max), este último crítico para evaluar la previsibilidad del sistema.
+
+<h3 id="configuracion">Configuración</h3>
+
+Las pruebas se desplegaron sobre una arquitectura de hardware x86_64. El entorno de software y la configuración experimental se definieron bajo las siguientes especificaciones:
+
+* **Imagen de prueba:** Imagen grande (2480 × 1860 píxeles).
+* **Implementación:** OpenMP (C), con **2 hilos** de procesamiento.
+* **Entorno A — Windows 11 Nativo:** El programa ejecuta directamente sobre el hardware físico, sin capas de virtualización intermedias, con acceso directo al planificador de hilos del sistema operativo.
+* **Entorno B — Fedora Linux 43 en VirtualBox:** El sistema operativo guest opera bajo el hipervisor de tipo 2 de VirtualBox, alojado sobre el mismo hardware físico que el Entorno A. Cada operación de cómputo debe ser mediada por el hipervisor antes de alcanzar el hardware real.
+
+<CalloutBlock
+  type="warning"
+  title="Overhead del Hipervisor de Tipo 2"
+  content="A diferencia de los hipervisores de tipo 1 (bare-metal), VirtualBox opera como un proceso más dentro del sistema operativo anfitrión (Windows). Esto significa que las llamadas al hardware realizadas por el sistema guest (Linux) deben atravesar dos capas del planificador: el del sistema guest y el del host. Esta doble mediación introduce latencia adicional e incrementa la variabilidad de los tiempos de ejecución, especialmente en operaciones con alta demanda de sincronización entre hilos como las regiones paralelas de OpenMP."
+/>
+
+<h2 id="resultados">Resultados</h2>
+
+<h3 id="categorizacion-de-tiempos">Categorización de tiempos</h3>
+
+En la tabla siguiente se presenta el resumen estadístico de los tiempos de ejecución obtenidos tras las 100 corridas programadas para cada entorno. Los datos permiten contrastar directamente el impacto de la virtualización sobre el promedio, la estabilidad y los casos extremos de rendimiento.
+
+<AcademicTable
+  tableNumber={1}
+  data={{
+    caption: "Categorización de tiempos promedio, mejor y peor (ms) para el Caso C: Windows 11 Nativo vs. Fedora Linux 43 en VirtualBox. OpenMP con 2 hilos, imagen grande (2480 × 1860 px). Muestra de 100 corridas.",
+    headers: ["Entorno", "Mejor (ms)", "Promedio (ms)", "Peor (ms)", "Total Corridas"],
+    rows: [
+      ["Windows 11 (Nativo)",          "1.8313", "4.4406", "26.0009", "100"],
+      ["Fedora Linux 43 (VirtualBox)", "0.8271", "6.4297", "37.0030", "100"],
+    ],
+    highlightCol: 2,
+  }}
+/>
+
+Un dato que merece atención especial es que el **mejor tiempo individual de Linux (0.83 ms) supera al mejor tiempo de Windows (1.83 ms)**. Esto no contradice la tendencia general, sino que refleja la naturaleza no determinista del hipervisor: en condiciones ideales de baja carga del host, la VM puede llegar a ejecutar operaciones con latencias excepcionalmente bajas. Sin embargo, este comportamiento es excepcional y no sostenido, como lo evidencia la marcada diferencia en los promedios y, sobre todo, en los peores tiempos registrados.
+
+<ChartContainer
+  figureNumber={1}
+  caption="Distribución de los 100 tiempos de ejecución (ms) por entorno. Se evidencia la mayor dispersión y los picos de latencia característicos de la ejecución bajo hipervisor en el entorno Linux/VirtualBox."
+>
+ <img src="/resources/CaseC/OMP_(2_hilos).png" alt="Gráfico de rendimiento (Linux vs Windows)" style={{ width: '80%', height: 'auto' }} />
+</ChartContainer>
+
+<h2 id="conclusiones">Conclusiones</h2>
+
+Las hipótesis de Jairo y Mariana son las que mejor concuerdan con los resultados experimentales obtenidos. Los datos confirman que Windows fue más rápido en promedio (~4.44 ms vs ~6.43 ms en Linux), con un peor tiempo y mayor variabilidad en el entorno virtualizado. Esto es consistente con lo que ambos predijeron: Windows, al operar directamente sobre el hardware, exhibe tiempos de ejecución menores. Sin embargo, la hipótesis de Jairo resulta la más completa y técnicamente precisa, ya que no solo anticipa el resultado correcto, sino que identifica la causa raíz del fenómeno: Linux dentro de VirtualBox debe atravesar la capa del hipervisor para acceder al hardware. Cada llamada al procesador, a la memoria o a los hilos de OpenMP debe ser mediada antes de llegar al hardware real, introduciendo latencia extra e inconsistencia en los tiempos.
+
+La hipótesis de Jeovani tiene razón en señalar que la cantidad de núcleos asignados a la VM afecta el rendimiento, pero se queda corta: el problema no es únicamente la disponibilidad de núcleos, sino la capa de abstracción del hipervisor que interviene en cada operación, independientemente de cuántos núcleos estén asignados. Jeycson, por su parte, identifica correctamente el concepto clave del overhead por la capa de comunicación entre la VM y el hardware real, aunque su argumento técnico aplica con mayor precisión a una comparación de Linux nativo versus Linux en VM, no exactamente al escenario planteado. Mariana predice el resultado correcto —que Windows sería más rápido— pero su justificación es demasiado general; los propios datos muestran que Linux fue más rápido en **43 de 100 ejecuciones**, lo que evidencia que no se trata de una regla absoluta, sino de una tendencia estadística condicionada por el estado del hipervisor y del sistema anfitrión en cada instante.
+
+En conclusión, los resultados experimentales confirman que ejecutar Linux dentro de VirtualBox sobre Windows 11 introduce un overhead de virtualización que se traduce en tiempos de ejecución mayores e inconsistentes respecto a Windows corriendo de forma nativa. Windows resultó más rápido en promedio (4.44 ms vs 6.43 ms) y más estable, con una variabilidad considerablemente menor. Esto se debe a que el hipervisor de VirtualBox actúa como intermediario entre el sistema guest y el hardware real, añadiendo latencia en cada operación de cómputo y sincronización de hilos. De las hipótesis planteadas, la de Jairo es la que mejor describe este comportamiento, combinando predicción correcta con la explicación técnica más precisa de la causa raíz. Vale la pena destacar que el impacto de la virtualización no es una penalización fija y constante, como lo demuestra el hecho de que Linux registró el mejor tiempo individual absoluto (0.83 ms) y resultó más rápido en casi la mitad de las corridas; el overhead del hipervisor es variable e impredecible, y se manifiesta especialmente en los peores escenarios de contención de recursos.
