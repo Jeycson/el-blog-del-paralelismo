@@ -1,0 +1,59 @@
+export const metadata = {
+  toc: [
+    { id: 'introduccion',  title: 'Introducción',            level: 1 },
+    { id: 'metodologia',   title: 'Metodología',             level: 1 },
+    { id: 'configuracion', title: 'Configuración',           level: 2 },
+    { id: 'resultados',    title: 'Resultados',              level: 1 },
+    { id: 'tabla-tiempos', title: 'Tabla de tiempos',        level: 2 },
+    { id: 'conclusiones',  title: 'Conclusiones',            level: 1 },
+  ]
+}
+
+## Introducción
+
+El paradigma de computación paralela ha experimentado una evolución acelerada
+impulsada por el estancamiento del escalado de frecuencia en microprocesadores modernos...
+
+## Metodología
+
+### Configuración
+
+Cada condición experimental fue ejecutada con afinidad de CPU fijada mediante
+`taskset`, garantizando que los hilos no migren durante la medición.
+
+<CalloutBlock
+  type="note"
+  title="Baseline con -O3 y -march=native"
+  content="El baseline fue compilado con -O3 -march=native, permitiendo al compilador
+           auto-vectorizar con SSE4.2. El SpeedUp SIMD se mide relativo a este baseline."
+/>
+
+## Resultados
+
+### Tabla de tiempos
+
+<AcademicTable
+  tableNumber={1}
+  data={{
+    caption: "Tiempos promedio (ms) para N = 10 elementos. Mediana de 30 repeticiones.",
+    headers: ["Implementación", "(ms)", "(ms)", "SpeedUp", "Eficiencia"],
+    rows: [
+      ["Secuencial",     "4 820", "42", "1.00", "100%"],
+      ["SIMD AVX2",      "1 210", "18", "3.98", "99.5%"],
+      ["OpenMP 8 hilos", "820",   "22", "5.88", "73.5%"],
+    ],
+    highlightCol: 3,
+  }}
+/>
+
+<ChartContainer
+  figureNumber={1}
+  caption="Distribución del SpeedUp en 30 repeticiones. Los bigotes indican IQR x 1.5."
+>
+  <ChartPlaceholder type="boxplot" label="SpeedUp por implementación" />
+</ChartContainer>
+
+## Conclusiones
+
+Los resultados establecen que SIMD AVX2 es el método más eficiente en términos
+de cores utilizados para operaciones de reducción sobre arreglos de punto flotante.
