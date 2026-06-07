@@ -1,8 +1,8 @@
 export const metadata = {
   toc: [
     { id: 'introducción',  title: 'Introducción',            level: 1 },
-    { id: 'metodologia',   title: 'Metodología',             level: 1 },
-    { id: 'configuracion', title: 'Configuración',           level: 2 },
+    { id: 'configuración', title: 'Configuración',           level: 1 },
+    { id: 'dataset', title: 'Dataset',           level: 1 },
     { id: 'resultados',    title: 'Resultados',              level: 1 },
     { id: 'conclusiones',  title: 'Conclusiones',            level: 1 },
   ]
@@ -11,20 +11,148 @@ export const metadata = {
 ## Introducción
 
 El paradigma de computación paralela ha experimentado una evolución acelerada
-impulsada por el estancamiento del escalado de frecuencia en microprocesadores modernos...
+por lo que existen diferentes formas de aprovechar la capacidad de computo paralelo.
+Entre ellas encontramos tecnologias como OpenMP y OpenCV.
+En este caso de estudio se analizara el comportamiento de los tiempos de ejecución de
+diferentes configuraciones para diferentes tamaños de imagen.
 
-## Metodología
+## Configuración
 
-### Configuración
+Para el caso de estudio actual se emplearon las diferentes configuraciones:
 
-Cada condición experimental fue ejecutada con afinidad de CPU fijada mediante
-`taskset`, garantizando que los hilos no migren durante la medición.
+**1. Implementación secuencial**
+```
+void BMP::brightness(const int u)
+{
+	if (u == 0 && !isImageLoaded) return;
 
-<CalloutBlock
-  type="note"
-  title="Baseline con -O3 y -march=native"
-  content="El baseline fue compilado con -O3 -march=native, permitiendo al compilador
-           auto-vectorizar con SSE4.2. El SpeedUp SIMD se mide relativo a este baseline."
+
+	for (int y = 0; y < header.height; y++) {
+		for (int x = 0; x < header.width; x++) {
+
+
+			Color color = getPixel(x, y);
+
+
+			color.r = CLAMP(color.r + u);
+			color.g = CLAMP(color.g + u);
+			color.b = CLAMP(color.b + u);
+
+
+			setPixel(x, y, color);
+		}
+	}
+}
+```
+**2. Implementación en SIMD (sin hilos)**
+```
+//Llamado a la funcion en ASM
+brightness_xmmw(u, bmp.getImageData(), bmp.getImageSize());
+```
+```
+//Función en ASM
+brightness_xmmw:
+
+	push	rbp
+	mov		rbp, rsp
+	
+	push	rax
+	push	rbx
+	push	rsi
+		
+	movdqu	xmm0, [rcx]
+	mov		rsi, rdx
+	mov		rax, r8
+
+	mov		rcx, 16
+	cdq
+	div		rcx
+	mov		rcx, rax
+	xor		rax, rax
+	xor		rbx, rbx
+	xor		rdx, rdx
+```
+**3. Implementación en SIMD (con 2, 4, 8 y 16 hilos)**
+```
+for(i = 0; i < NUM_HILOS; i++) {
+		datos[i].gimg = bmp.getImageData() + (sizeof(BYTE) * (bmp.getImageSize() / NUM_HILOS) * i);
+		datos[i].size = bmp.getImageSize() / NUM_HILOS;
+		memcpy(datos[i].u, u, 16);
+		hThread[i] = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)hilo, &datos[i], 0, dThreadId);
+
+		if(hThread[i] == NULL) {
+			printf("Error al crear el hilo %d\n", i);
+			return 1;
+		}	
+	}
+
+for (i = 0; i < NUM_HILOS; i++) {
+  WaitForSingleObject(hThread[i], INFINITE);
+  CloseHandle(hThread[i]);
+}
+```
+**4. Implementación en OMP (con 2, 4, 8 y 16 hilos)**
+```
+omp_set_num_threads(NUM_HILOS);
+
+#pragma omp parallel for private(i)
+	for(i = 0; i < NUM_HILOS; i++) {
+		BYTE* gimp_ptr = base_img + (chunck_size * i);
+		brightness_xmmw(u, gimp_ptr, chunck_size);
+	}
+```
+**4. Implementación en Python (con 1, 2, 4, 8, 16 hilos)**
+```
+def ejecutar_corrida_completa(ruta_imagen, num_hilos, factor_brillo=50):
+    img = cv2.imread(ruta_imagen)
+    if img is None:
+        return None
+        
+    alto, ancho, _ = img.shape
+    vector_brillo = np.array([factor_brillo, factor_brillo, factor_brillo], dtype=np.uint8)
+    img_brillo = np.zeros_like(img)
+    
+    t_inicio = time.perf_counter()
+    
+    # 2. Creación y lanzamiento de hilos
+    filas_por_hilo = alto // num_hilos
+    lista_hilos = []
+    
+    for j in range(num_hilos):
+        inicio_fila = j * filas_por_hilo
+        fin_fila = alto if (j == num_hilos - 1) else (j + 1) * filas_por_hilo
+        
+        hilo = threading.Thread(
+            target=procesar_bloque_brillo,
+            args=(img, inicio_fila, fin_fila, vector_brillo, img_brillo)
+        )
+        lista_hilos.append(hilo)
+        hilo.start()
+        
+    # 3. Sincronización
+    for hilo in lista_hilos:
+        hilo.join()
+```
+## Dataset
+
+Para esta prueba se utilizaron las siguientes imagenes:
+<ArticleImage 
+  src="/nature.jpg" 
+  alt="Imagen mediana"
+  height="100px"
+  caption="Figura 1: Imagen Mediana (1240 x 930 píxeles)"
+/>
+<ArticleImage 
+  src="/nature.jpg" 
+  alt="Imagen grande"
+  height="200px"
+  caption="Figura 2: Imagen Grande (2480 x 1860 píxeles)"
+/>
+<ArticleImage 
+  src="/nature.jpg" 
+  alt="Imagen muy grande"
+  height="300px"
+  caption="Figura 2: Imagen Muy Grande (3720 x 2790 píxeles)"
 />
 
 ## Resultados
