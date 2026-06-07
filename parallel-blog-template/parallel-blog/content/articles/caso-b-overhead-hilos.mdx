@@ -1,8 +1,9 @@
 export const metadata = {
   toc: [
-    { id: 'introduccion',              title: 'Introducción',              level: 1 },
+    { id: 'introduccion',             title: 'Introducción',              level: 1 },
     { id: 'metodologia',               title: 'Metodología',               level: 1 },
     { id: 'configuracion',             title: 'Configuración',             level: 2 },
+    { id: 'procesamiento-de-imagen',   title: 'Procesamiento de Imagen',   level: 2 },
     { id: 'resultados',                title: 'Resultados',                level: 1 },
     { id: 'categorizacion-de-tiempos', title: 'Categorización de tiempos', level: 2 }, 
     { id: 'conclusiones',              title: 'Conclusiones',              level: 1 },
@@ -25,22 +26,136 @@ Para mitigar la varianza estocástica introducida por factores externos del ento
 
 Las pruebas se desplegaron sobre una arquitectura de hardware x86_64 dotada de núcleos físicos hiper-entrelazados (Hyper-Threading). El entorno de software y compilación se configuró bajo las siguientes especificaciones:
 
-* **Entorno Operativo:** Microsoft Windows 11, operando bajo un esquema de planificación de hilos de prioridad dinámica.
-* **Implementación OpenMP (C):** Código fuente nativo compilado con soporte para multiprocesamiento de memoria compartida, utilizando barreras de sincronización implícitas al final de las regiones paralelas.
-* **Implementación SIMD (C):** Uso de registros vectoriales nativos de la CPU a través de funciones intrínsecas, permitiendo la ejecución de una sola instrucción sobre múltiples datos de punto flotante en un único ciclo de reloj.
-* **Implementación Python:** Entorno de ejecución interpretado bajo la implementación de referencia CPython, caracterizado por la presencia del mecanismo de exclusión mutua GIL.
+**Entorno Operativo:** Microsoft Windows 11, operando bajo un esquema de planificación de hilos de prioridad dinámica.
 
+**El codigo base para la ejecucion en C:** Infraestructura principal en C diseñada para la carga de la imagen, inicialización del vector de ajuste de brillo, temporización de los enfoques paralelos y guardado del resultado final.
+```
+#define NUM 2 // 4, 8, 16
+int main(int argc, char** argv)
+{
+    LARGE_INTEGER tinicio, tfin, frec;
+    double mcseg;
+    unsigned char u[16] = { 50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50 };
+	BMP bmp("nature2.bmp");
+    QueryPerformanceFrequency(&frec);
+
+    QueryPerformanceCounter(&tinicio);
+
+    // ENFOQUE 2: Paralelo SIMD
+    procesar_paralelo_simd(bmp, u);
+
+    // ENFOQUE 3: Paralelo con OpenMP
+    procesar_paralelo_omp(bmp);
+
+    QueryPerformanceCounter(&tfin);
+    bmp.save("brightness.bmp");
+    mcseg = (double)(tfin.QuadPart - tinicio.QuadPart) / frec.QuadPart;
+    printf("Tiempo transcurrido: %lf ms\n", mcseg * 1000);
+
+    return 0;
+}
+```
+
+**Implementación OpenMP (C):** Código fuente nativo con soporte para multiprocesamiento de memoria compartida (TLP). Distribuye los fragmentos del bucle de forma equitativa mediante una directiva estática y sincroniza los hilos a través de una barrera implícita al finalizar la región paralela.
+```
+void procesar_paralelo_omp(BMP& bmp) {
+    BYTE* data = bmp.getImageData();
+    int size = bmp.getImageSize();
+
+#pragma omp parallel for schedule(static) num_threads(NUM)
+    for (int i = 0; i < size; i++) {
+        int temp = data[i] + 50;
+        if (temp > 255) data[i] = 255;
+        else if (temp < 0) data[i] = 0;
+        else data[i] = (BYTE)temp;
+    }
+}
+```
+
+**Implementación SIMD (C):** Enfoque híbrido que combina paralelismo a nivel de hilos (TLP) y de datos (DLP). Segmenta el buffer de la imagen en fragmentos proporcionales al número de hilos definidos (NUM) mediante la API nativa de Windows (CreateThread). Cada hilo invoca una rutina secundaria encargada de ejecutar instrucciones intrínsecas vectoriales para procesar múltiples píxeles por ciclo de reloj utilizando un arreglo de control (u).
+```
+void procesar_paralelo_simd(BMP& bmp, unsigned char u[16]) {
+    HANDLE hThread[NUM] = { NULL };
+    LPDWORD deTheradId = { NULL };
+    STDATOS datos[NUM];
+
+    for (int i = 0; i < NUM; i++)
+    {
+        datos[i].gimg = bmp.getImageData() + (sizeof(BYTE) * (bmp.getImageSize() / NUM) * i);
+        datos[i].size = bmp.getImageSize() / NUM;
+        memcpy(datos[i].u, u, 16);
+        hThread[i] = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)hilo, &datos[i], 0, deTheradId);
+
+        if (hThread[i] == NULL) {
+            printf("Error al crear el hilo %d\n", i);
+            return;
+        }
+    }
+
+    for (int i = 0; i < NUM; i++)
+    {
+        WaitForSingleObject(hThread[i], INFINITE);
+        CloseHandle(hThread[i]);
+    }
+}
+```
+
+**Implementación Python:** Entorno de ejecución interpretado bajo CPython. A pesar de la concurrencia basada en la biblioteca threading para dividir la carga de filas de la imagen, el paralelismo real a nivel de hilos de CPU se ve restringido por el Mecanismo de Exclusión Mutua (GIL, Global Interpreter Lock).
+```
+img = cv2.imread(ruta_imagen)
+    if img is None:
+        return None
+        
+    alto, ancho, _ = img.shape
+    vector_brillo = np.array([factor_brillo, factor_brillo, factor_brillo], dtype=np.uint8)
+    img_brillo = np.zeros_like(img)
+    
+    # Creación y lanzamiento de hilos
+    filas_por_hilo = alto // num_hilos
+    lista_hilos = []
+    
+    for j in range(num_hilos):
+        inicio_fila = j * filas_por_hilo
+        fin_fila = alto if (j == num_hilos - 1) else (j + 1) * filas_por_hilo
+        
+        hilo = threading.Thread(
+            target=procesar_bloque_brillo,
+            args=(img, inicio_fila, fin_fila, vector_brillo, img_brillo)
+        )
+        lista_hilos.append(hilo)
+        hilo.start()
+        
+    # Sincronización
+    for hilo in lista_hilos:
+        hilo.join()
+
+    t_fin = time.perf_counter()
+    return (t_fin - t_inicio) * 1000
+```
 <CalloutBlock
   type="warning"
   title="Impacto del Context Switch y el GIL"
   content="A medida que el número de hilos excede la cantidad de núcleos físicos disponibles en el hardware, el planificador del sistema operativo se ve forzado a realizar un sobre-muestreo de cambios de contexto (Context Switching). En el caso de Python, este fenómeno se ve agravado por la serialización forzosa del GIL, lo que transforma el paralelismo real en un esquema de concurrencia competitiva por el núcleo."
 />
 
+<h3 id="procesamiento-de-imagen">Procesamiento de Imagen</h3>
+
+Para evaluar la eficiencia del paralelismo en cada tecnología, se seleccionó como carga de trabajo un algoritmo de **modificación de brillo** sobre un arreglo unidimensional de píxeles (formato RGB/RGBA). Esta operación de procesamiento punto a punto consiste en aplicar una transformación lineal simétrica a cada canal de color.
+
+A continuación, se presenta el recurso visual utilizado como matriz base para las pruebas de cómputo intensivo:
+
+<figure style={{ textBreak: 'avoid', margin: '2rem auto', maxWidth: '60%', textAlign: 'center' }}>
+  <img src="/nature2.png" alt="Imagen base para procesamiento de brillo" style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '8px' }} />
+  <figcaption style={{ fontSize: '0.85rem', color: '#666', marginTop: '0.75rem' }}>
+    <strong>Figura 1:</strong> Imagen de prueba utilizada para evaluar el algoritmo de ajuste de brillo en los entornos paralelos y vectoriales. Tamaño (1240x930)
+  </figcaption>
+</figure>
+
 <h2 id="resultados">Resultados</h2>
 
 <h3 id="categorizacion-de-tiempos">Categorización de tiempos</h3>
 
-En la tabla correspondiente al Caso B, se presenta un resumen detallado de los tiempos de ejecución obtenidos tras realizar las 100 corridas programadas para cada configuración. El formato facilita la identificación inmediata de los límites de escalabilidad, permitiendo contrastar directamente cómo afecta la asignación de más hilos al tiempo de procesamiento bajo un mismo entorno de hardware.
+En la **tabla 1**, se presenta un resumen detallado de los tiempos de ejecución obtenidos tras realizar las 100 corridas programadas para cada configuración. El formato facilita la identificación inmediata de los límites de escalabilidad, permitiendo contrastar directamente cómo afecta la asignación de más hilos al tiempo de procesamiento bajo un mismo entorno de hardware.
 
 <AcademicTable
   tableNumber={1}
@@ -66,18 +181,18 @@ En la tabla correspondiente al Caso B, se presenta un resumen detallado de los t
 />
 
 <ChartContainer
-  figureNumber={1}
+  figureNumber={2}
   caption="Distribución e inflexión del tiempo promedio (ms) vs. cantidad de hilos por tecnología. Se evidencia la pérdida de eficiencia por overhead de sincronización."
 >
  <img src="/resources/CaseB/Grafica_Representativa.png" alt="Gráfico de rendimiento" style={{ width: '100%', height: 'auto' }} />
 </ChartContainer>
 
+Asimismo en la **Figura 2**, se puede observar en el desglose del documento, esta estructura permite contrastar directamente cómo afecta la asignación de más hilos al tiempo de procesamiento bajo un mismo entorno de hardware y sistema operativo. El formato facilita la identificación inmediata de los límites de escalabilidad y la estabilidad de cada lenguaje, sirviendo como punto de partida para evaluar el impacto del overhead de hilos en la arquitectura del sistema.
+
 <h2 id="conclusiones">Conclusiones</h2>
 
-Las respuestas de Jairo y Jeo son las que mejor predicen el comportamiento real del sistema, siendo la de Jairo la más exacta: “Los datos demuestran que añadir hilos no mejora el rendimiento indefinidamente; por el contrario, existe un punto de inflexión óptimo (4 hilos para OpenMP y Python, y 2 hilos para SIMD)“, donde se obtienen los menores tiempos promedio (4.89 ms, 8.56 ms y 4.48 ms respectivamente). A partir de ahí, al subir a 8 y 16 hilos, el rendimiento empeora y los tiempos se elevan. Esto ocurre porque el tamaño de la imagen es fijo y el trabajo se fragmenta tanto que el sistema operativo gasta más tiempo y recursos en la administración, sincronización y "cambios de contexto" de los hilos (overhead), que en el procesamiento real de los píxeles.
+Con base a las hipotesis, podemos afirmar que las respuestas de Jairo y Jeo son las que mejor predicen el comportamiento real del sistema, siendo la de Jairo la más exacta: “Los datos demuestran que añadir hilos no mejora el rendimiento indefinidamente; por el contrario, existe un punto de inflexión óptimo (4 hilos para OpenMP y Python, y 2 hilos para SIMD)“, donde se obtienen los menores tiempos promedio (4.89 ms, 8.56 ms y 4.48 ms respectivamente). A partir de ahí, al subir a 8 y 16 hilos, el rendimiento empeora y los tiempos se elevan. Esto ocurre porque el tamaño de la imagen es fijo y el trabajo se fragmenta tanto que el sistema operativo gasta más tiempo y recursos en la administración, sincronización y "cambios de contexto" de los hilos (overhead), que en el procesamiento real de los píxeles de brillo.
 
 En el apartado de software, Windows debe gestionar la sobrecarga de hilos, lo que dispara la inestabilidad. Esto se evidencia de forma crítica en los "peores tiempos" de la tabla: con 8 hilos, OpenMP sufre un pico de retraso de 12.48 ms y Python se dispara hasta unos alarmantes 39.89 ms, bloqueado además por su GIL (Global Interpreter Lock), que impide el verdadero paralelismo multifilamento en la CPU.
 
 Para romper esta barrera física y de software, la estrategia más efectiva no es añadir más hilos, sino incrementar el tamaño del problema (Escalamiento de Gustafson); si se procesa una imagen mucho más grande, el tiempo de cómputo por hilo justificará plenamente el costo de organizarlos. Como dato curioso y contundente que arrojan las métricas, la tecnología SIMD en C con solo 2 hilos logra un tiempo excelente de 4.48 ms, superando incluso a OpenMP con 2 hilos (5.25 ms); esto demuestra que el aprovechamiento de los vectores de la propia CPU es inicialmente más limpio y eficiente que saturar prematuramente el sistema con paralelismo a nivel de hilos.
-
-Podemos decir que los tiempos de ejecución no mejorarán de forma indefinida ni lineal; al contrario, presentarán un comportamiento de campana o punto de inflexión óptimo donde se alcanzan las mayores eficiencias. Más allá de este límite, condicionado por los núcleos físicos del hardware y el overhead de software en la gestión de hilos, incrementar la cantidad de hilos a 8 o 16 provocará una degradación progresiva de los tiempos promedio y disparará la inestabilidad en los peores tiempos de respuesta. Esto demuestra que, para un tamaño de carga constante y reducido, el costo del sistema operativo para fragmentar, sincronizar y realizar cambios de contexto supera por completo el beneficio de la paralelización. 
