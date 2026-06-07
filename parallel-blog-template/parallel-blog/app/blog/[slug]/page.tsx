@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ARTICLES, HARDWARE_SPECS } from "@/lib/data";
 import TableOfContents from "@/app/components/article/TableOfContents";
-
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
@@ -25,6 +24,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 // Mapas de importaciones para que Webpack resuelva todo en tiempo de compilación estática (Build Time)
 const mdxArticles: Record<string, any> = {
   "caso-a-variacion-carga": () => import("@/content/articles/caso-a-variacion-carga.mdx"),
+  "caso-b-overhead-hilos": () => import("@/content/articles/caso-b-overhead-hilos.mdx"),
+  "caso-f-speedup-sistemas-operativos": () => import("@/content/articles/caso-f-speedup-sistemas-operativos.mdx"),
   // Agrega aquí tus otros slugs cuando crees más artículos, ej:
   // "caso-b-optimizacion-memoria": () => import("@/content/articles/caso-b-optimizacion-memoria.mdx"),
 };
