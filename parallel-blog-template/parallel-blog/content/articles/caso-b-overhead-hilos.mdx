@@ -1,27 +1,27 @@
 export const metadata = {
   toc: [
-    { id: 'introduccion',  title: 'Introducción',             level: 1 },
-    { id: 'metodologia',   title: 'Metodología',              level: 1 },
-    { id: 'configuracion', title: 'Configuración',            level: 2 },
-    { id: 'resultados',    title: 'Resultados',               level: 1 },
-    { id: 'tabla-tiempos', title: 'Categorización de tiempos',level: 2 },
-    { id: 'conclusiones',  title: 'Conclusiones',             level: 1 },
+    { id: 'introduccion',              title: 'Introducción',              level: 1 },
+    { id: 'metodologia',               title: 'Metodología',               level: 1 },
+    { id: 'configuracion',             title: 'Configuración',             level: 2 },
+    { id: 'resultados',                title: 'Resultados',                level: 1 },
+    { id: 'categorizacion-de-tiempos', title: 'Categorización de tiempos', level: 2 }, 
+    { id: 'conclusiones',              title: 'Conclusiones',              level: 1 },
   ]
 }
 
-## Introducción
+<h2 id="introduccion">Introducción</h2>
 
 El análisis de rendimiento en sistemas de cómputo paralelos representa un pilar fundamental para optimizar algoritmos de procesamiento digital de señales e imágenes. Históricamente, el incremento de rendimiento se ligaba al escalado de frecuencia del reloj en microprocesadores mononúcleo (Ley de Moore). Sin embargo, las barreras físicas impuestas por la disipación térmica y el consumo energético (Wall Térmico) reorientaron la evolución del hardware hacia arquitecturas multinúcleo y unidades de procesamiento masivamente paralelas. 
 
 En este contexto, la paralelización a nivel de hilos de software (TLP, *Thread-Level Parallelism*) y la paralelización a nivel de instrucciones (ILP, *Instruction-Level Parallelism*) mediante unidades vectoriales surgen como las estrategias dominantes. El presente reporte evalúa empíricamente el comportamiento del algoritmo bajo un escenario de carga de trabajo constante (Tamaño de Imagen Fijo) variando la densidad de hilos concurrentes. El objetivo es identificar experimentalmente las fronteras de escalabilidad lineal, cuantificar el impacto del fenómeno de *overhead* por sincronización en el planificador del sistema operativo y contrastar la eficiencia de entornos nativos compilados frente a lenguajes interpretados.
 
-## Metodología
+<h2 id="metodologia">Metodología</h2>
 
 El diseño experimental se fundamenta en un análisis cuantitativo y comparativo bajo un enfoque de escalamiento fuerte (Strong Scaling), donde el tamaño total del problema se mantiene invariante (`W = constante`) mientras se incrementan de forma controlada los recursos de procesamiento (`p = 2, 4, 8, 16` hilos). 
 
 Para mitigar la varianza estocástica introducida por factores externos del entorno de ejecución (procesos en segundo plano del sistema operativo, interrupciones de hardware y políticas de ahorro energético), se implementó un protocolo de muestreo estadístico basado en 100 réplicas independientes por cada configuración experimental. Los estimadores analizados para caracterizar la distribución de probabilidad del tiempo de ejecución (`T`) incluyen el límite inferior o tiempo óptimo (T_min), el tiempo promedio como métrica de tendencia central (T_promedio), y el límite superior o peor escenario registrado (T_max), este último crítico para evaluar la previsibilidad del sistema en entornos de tiempo real.
 
-### Configuración
+<h3 id="configuracion">Configuración</h3>
 
 Las pruebas se desplegaron sobre una arquitectura de hardware x86_64 dotada de núcleos físicos hiper-entrelazados (Hyper-Threading). El entorno de software y compilación se configuró bajo las siguientes especificaciones:
 
@@ -36,9 +36,9 @@ Las pruebas se desplegaron sobre una arquitectura de hardware x86_64 dotada de n
   content="A medida que el número de hilos excede la cantidad de núcleos físicos disponibles en el hardware, el planificador del sistema operativo se ve forzado a realizar un sobre-muestreo de cambios de contexto (Context Switching). En el caso de Python, este fenómeno se ve agravado por la serialización forzosa del GIL, lo que transforma el paralelismo real en un esquema de concurrencia competitiva por el núcleo."
 />
 
-## Resultados
+<h2 id="resultados">Resultados</h2>
 
-### Categorización de tiempos
+<h3 id="categorizacion-de-tiempos">Categorización de tiempos</h3>
 
 En la tabla correspondiente al Caso B, se presenta un resumen detallado de los tiempos de ejecución obtenidos tras realizar las 100 corridas programadas para cada configuración. El formato facilita la identificación inmediata de los límites de escalabilidad, permitiendo contrastar directamente cómo afecta la asignación de más hilos al tiempo de procesamiento bajo un mismo entorno de hardware.
 
@@ -72,7 +72,7 @@ En la tabla correspondiente al Caso B, se presenta un resumen detallado de los t
  <img src="/resources/CaseB/Grafica_Representativa.png" alt="Gráfico de rendimiento" style={{ width: '100%', height: 'auto' }} />
 </ChartContainer>
 
-## Conclusiones
+<h2 id="conclusiones">Conclusiones</h2>
 
 Las respuestas de Jairo y Jeo son las que mejor predicen el comportamiento real del sistema, siendo la de Jairo la más exacta: “Los datos demuestran que añadir hilos no mejora el rendimiento indefinidamente; por el contrario, existe un punto de inflexión óptimo (4 hilos para OpenMP y Python, y 2 hilos para SIMD)“, donde se obtienen los menores tiempos promedio (4.89 ms, 8.56 ms y 4.48 ms respectivamente). A partir de ahí, al subir a 8 y 16 hilos, el rendimiento empeora y los tiempos se elevan. Esto ocurre porque el tamaño de la imagen es fijo y el trabajo se fragmenta tanto que el sistema operativo gasta más tiempo y recursos en la administración, sincronización y "cambios de contexto" de los hilos (overhead), que en el procesamiento real de los píxeles.
 
