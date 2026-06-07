@@ -2,7 +2,7 @@ import { Article, HardwareSpec } from "@/types";
 
 export const PROJECT_META = {
   title: "Computación Paralela & Sistemas Distribuidos",
-  shortTitle: "CompPar Lab",
+  shortTitle: "UnistmoLAB",
   institution: "Universidad del Istmo",
   faculty: "Ingeniería en Computación",
   semester: "Primavera 2025",
