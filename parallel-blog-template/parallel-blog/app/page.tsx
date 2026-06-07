@@ -72,10 +72,19 @@ export default function HomePage() {
               <ul className="space-y-4">
                 {PROJECT_META.members.map((m) => (
                   <li key={m.name} className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-[#1e3a5f] flex items-center justify-center shrink-0">
-                      <span className="text-sm font-bold text-white uppercase">
-                        {m.name.charAt(0)}
-                      </span>
+                    {/* Contenedor del Avatar / Fallback */}
+                    <div className="w-10 h-10 rounded-full bg-[#1e3a5f] relative overflow-hidden flex items-center justify-center shrink-0 border border-slate-100">
+                      {m.photo ? (
+                        <img 
+                          src={m.photo} 
+                          alt={`Foto de perfil de ${m.name}`}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-sm font-bold text-white uppercase">
+                          {m.name.charAt(0)}
+                        </span>
+                      )}
                     </div>
                     <div>
                       <p className="text-[14px] font-semibold text-slate-900">
@@ -95,10 +104,19 @@ export default function HomePage() {
                   Mentor de Investigación
                 </p>
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
-                    <span className="text-sm font-bold text-slate-600 uppercase">
-                      {PROJECT_META.mentor.name.charAt(3)}
-                    </span>
+                  {/* Contenedor del Avatar del Mentor */}
+                  <div className="w-10 h-10 rounded-full bg-slate-200 relative overflow-hidden flex items-center justify-center shrink-0 border border-slate-200">
+                    {PROJECT_META.mentor.photo ? (
+                      <img 
+                        src={PROJECT_META.mentor.photo} 
+                        alt={`Foto de perfil de ${PROJECT_META.mentor.name}`}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-sm font-bold text-slate-600 uppercase">
+                        {PROJECT_META.mentor.name.charAt(0)}
+                      </span>
+                    )}
                   </div>
                   <div>
                     <p className="text-[14px] font-semibold text-slate-900">
