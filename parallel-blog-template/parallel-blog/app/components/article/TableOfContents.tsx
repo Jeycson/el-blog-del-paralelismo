@@ -76,24 +76,6 @@ export default function TableOfContents({
         })}
       </ul>
 
-      {/* Download button */}
-      <div className="mt-8 pt-6 border-t border-slate-100">
-        <button
-          onClick={onDownload}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2.5 border border-[#1e3a5f] text-[#1e3a5f] text-[11px] tracking-wide uppercase font-semibold rounded-sm hover:bg-[#1e3a5f] hover:text-white transition-all duration-150 group"
-        >
-          <svg
-            viewBox="0 0 16 16"
-            className="w-3.5 h-3.5 fill-current"
-            aria-hidden
-          >
-            <path d="M8 12L3 7h3V1h4v6h3L8 12z" />
-            <rect x="1" y="13" width="14" height="2" />
-          </svg>
-          {downloadLabel}
-        </button>
-      </div>
-
       {/* Back link */}
       <div className="mt-4">
         <a
