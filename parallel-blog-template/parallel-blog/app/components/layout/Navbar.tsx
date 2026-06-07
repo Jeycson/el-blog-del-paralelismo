@@ -25,13 +25,8 @@ export default function Navbar() {
       <nav className="max-w-7xl mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-7 h-7 relative">
-            <svg viewBox="0 0 28 28" fill="none" className="w-full h-full">
-              <rect x="0" y="0" width="12" height="12" fill="#1e3a5f" className="group-hover:fill-[#e85d26] transition-colors duration-200" />
-              <rect x="16" y="0" width="12" height="12" fill="#1e3a5f" opacity="0.4" />
-              <rect x="0" y="16" width="12" height="12" fill="#1e3a5f" opacity="0.4" />
-              <rect x="16" y="16" width="12" height="12" fill="#1e3a5f" className="group-hover:fill-[#e85d26] transition-colors duration-200" />
-            </svg>
+          <div className="w-14 h-14 relative">
+            <img src="/escudo.png" alt="Logo" />
           </div>
           <span className="font-serif text-[15px] font-semibold text-slate-900 tracking-tight leading-none">
             {PROJECT_META.shortTitle}
