@@ -95,11 +95,11 @@ export const ARTICLES: Article[] = [
         institution: "UNISTMO",
       }
     ],
-    date: "2026-06-06",
+    date: "2026-06-6",
     readingTime: 12,
     abstract:
       "Exploramos cómo el tamaño del dataset afecta el rendimiento de implementaciones paralelas en OpenMP, SIMD y Python. Encontramos que entre mayor es el tamaño de la imagen, mayor es el tiempo de procesamiento que le tomara a cada configuración.",
-    hardware: ["env-b"],
+    hardware: ["env-c"],
   },
   {
     slug: "caso-b-overhead-hilos",
