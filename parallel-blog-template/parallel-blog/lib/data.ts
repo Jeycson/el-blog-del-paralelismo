@@ -105,7 +105,7 @@ export const ARTICLES: Article[] = [
   {
     slug: "caso-b-overhead-hilos",
     title: "Caso B: Variación de número de hilos con el mismo tamaño de imagen",
-    subtitle: "Cuantificación del costo de pthread_create vs. thread pools en cargas variables",
+    subtitle: "Análisis de escalamiento fuerte, overhead de sincronización y el impacto del GIL bajo una carga de trabajo constante.",
     category: "Sistemas de Hilos",
     tags: ["POSIX Threads", "Thread Pool", "Latencia", "Overhead", "Linux", "OpenMP", "SIMD", "Python"],
     authors: [
@@ -117,7 +117,7 @@ export const ARTICLES: Article[] = [
     ],
     date: "2026-06-07",
     readingTime: 9,
-    abstract: "Medimos con nanosegundos de precisión el costo de creación, sincronización y destrucción de hilos POSIX frente a un pool pre-inicializado. Los resultados muestran diferencias de hasta 3× en cargas de trabajo de corta duración.",
+    abstract: "Medimos con nanosegundos de precisión el costo de creación, sincronización y destrucción de hilos POSIX.",
     hardware: ["env-a"],
   },
   {

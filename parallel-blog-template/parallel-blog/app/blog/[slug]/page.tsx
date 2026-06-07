@@ -160,7 +160,7 @@ export default async function ArticlePage({ params }: PageProps) {
           </div>
 
           {/* ── El cuerpo del artículo renderizado en el Servidor ── */}
-          <div className="article-body">
+          <div className="article-body text-justify break-words">
             {/* Ya no necesitas pasarle `components`, Next.js los inyecta mágicamente */}
             <Content /> 
           </div>
