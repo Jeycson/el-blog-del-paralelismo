@@ -108,7 +108,7 @@ export const ARTICLES: Article[] = [
   },
   {
     slug: "caso-b-overhead-hilos",
-    title: "Caso B: Overhead de Creación de Hilos",
+    title: "Caso B: Variación de número de hilos con el mismo tamaño de imagen",
     subtitle: "Cuantificación del costo de pthread_create vs. thread pools en cargas variables",
     category: "Sistemas de Hilos",
     tags: ["POSIX Threads", "Thread Pool", "Latencia", "Overhead", "Linux", "OpenMP", "SIMD", "Python"],
@@ -169,4 +169,22 @@ export const ARTICLES: Article[] = [
       "Utilizamos perf stat y Cachegrind para perfilar la tasa de L1/L2/L3 cache misses en implementaciones naive vs. optimizadas de multiplicación de matrices. El tiling por bloques reduce las faltas de L3 hasta un 87%.",
     hardware: ["env-a", "env-c"],
   },
+  {
+    slug: "caso-f-speedup-sistemas-operativos",
+    title: "Caso F: Variación de número de hilos con el mismo tamaño de imagen en Windows y Linux",
+    subtitle: "Evaluación del impacto del planificador de SO en factores de aceleración (SpeedUp)",
+    category: "Análisis de Rendimiento",
+    tags: ["Windows 11", "Fedora Linux", "SpeedUp", "Overhead", "GIL", "OpenMP", "SIMD"],
+    authors: [
+      {
+        name: "Jeovani Pacheco Rueda",
+        role: "Investigador SNII III",
+        institution: "Unistmo",
+      },
+    ],
+    date: "2026-06-07",
+    readingTime: 12,
+    abstract: "Analizamos el impacto crítico del diseño del kernel y el planificador de procesos (Scheduler) en Windows 11 vs. Ubuntu Linux 24.04. Los resultados exponen cómo cargas ligeras de tamaño fijo inducen pérdidas severas de eficiencia por overhead de hilos, revelando falsos espejismos de escalabilidad en entornos interpretados.",
+    hardware: ["env-a", "env-b"], 
+  }
 ];
