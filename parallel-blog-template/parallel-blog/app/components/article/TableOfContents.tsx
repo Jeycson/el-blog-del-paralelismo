@@ -17,15 +17,26 @@ export default function TableOfContents({
   const [active, setActive] = useState<string>("");
 
   useEffect(() => {
+    // Guardamos las secciones que están visibles en un mapa
+    const visibleSections: Record<string, boolean> = {};
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActive(entry.target.id);
-          }
+          // Actualizamos el estado de visibilidad de esta sección exacta
+          visibleSections[entry.target.id] = entry.isIntersecting;
         });
+
+        // Buscamos cuál es la PRIMERA sección que está cruzando la pantalla actualmente
+        const activeSection = items.find(({ id }) => visibleSections[id]);
+
+        // Si encontramos una sección visible, la pintamos de azul
+        if (activeSection) {
+          setActive(activeSection.id);
+        }
       },
-      { rootMargin: "-20% 0% -70% 0%", threshold: 0 }
+      // Flexibilizamos el margen para dar más espacio a los h2/h3 del MDX
+      { rootMargin: "-12% 0% -60% 0%", threshold: 0.1 }
     );
 
     items.forEach(({ id }) => {
@@ -46,13 +57,13 @@ export default function TableOfContents({
         {items.map((item) => {
           const isActive = active === item.id;
           const indent =
-            item.level === 2 ? "pl-3" : item.level === 3 ? "pl-5" : "";
+            item.level === 2 ? "ml-3" : item.level === 3 ? "ml-6" : "";
 
           return (
-            <li key={item.id}>
+            <li key={item.id} className={indent}>
               <a
                 href={`#${item.id}`}
-                className={`block text-[12px] leading-snug py-1 border-l-2 pl-3 transition-all duration-150 ${indent} ${
+                className={`block text-[12px] leading-snug py-1 border-l-2 pl-3 transition-all duration-150 ${
                   isActive
                     ? "border-[#1e3a5f] text-[#1e3a5f] font-semibold"
                     : "border-transparent text-slate-400 hover:text-slate-700 hover:border-slate-300"

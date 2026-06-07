@@ -1,0 +1,83 @@
+export const metadata = {
+  toc: [
+    { id: 'introduccion',  title: 'Introducción',             level: 1 },
+    { id: 'metodologia',   title: 'Metodología',              level: 1 },
+    { id: 'configuracion', title: 'Configuración',            level: 2 },
+    { id: 'resultados',    title: 'Resultados',               level: 1 },
+    { id: 'tabla-tiempos', title: 'Categorización de tiempos',level: 2 },
+    { id: 'conclusiones',  title: 'Conclusiones',             level: 1 },
+  ]
+}
+
+## Introducción
+
+El análisis de rendimiento en sistemas de cómputo paralelos representa un pilar fundamental para optimizar algoritmos de procesamiento digital de señales e imágenes. Históricamente, el incremento de rendimiento se ligaba al escalado de frecuencia del reloj en microprocesadores mononúcleo (Ley de Moore). Sin embargo, las barreras físicas impuestas por la disipación térmica y el consumo energético (Wall Térmico) reorientaron la evolución del hardware hacia arquitecturas multinúcleo y unidades de procesamiento masivamente paralelas. 
+
+En este contexto, la paralelización a nivel de hilos de software (TLP, *Thread-Level Parallelism*) y la paralelización a nivel de instrucciones (ILP, *Instruction-Level Parallelism*) mediante unidades vectoriales surgen como las estrategias dominantes. El presente reporte evalúa empíricamente el comportamiento del algoritmo bajo un escenario de carga de trabajo constante (Tamaño de Imagen Fijo) variando la densidad de hilos concurrentes. El objetivo es identificar experimentalmente las fronteras de escalabilidad lineal, cuantificar el impacto del fenómeno de *overhead* por sincronización en el planificador del sistema operativo y contrastar la eficiencia de entornos nativos compilados frente a lenguajes interpretados.
+
+## Metodología
+
+El diseño experimental se fundamenta en un análisis cuantitativo y comparativo bajo un enfoque de escalamiento fuerte (Strong Scaling), donde el tamaño total del problema se mantiene invariante (`W = constante`) mientras se incrementan de forma controlada los recursos de procesamiento (`p = 2, 4, 8, 16` hilos). 
+
+Para mitigar la varianza estocástica introducida por factores externos del entorno de ejecución (procesos en segundo plano del sistema operativo, interrupciones de hardware y políticas de ahorro energético), se implementó un protocolo de muestreo estadístico basado en 100 réplicas independientes por cada configuración experimental. Los estimadores analizados para caracterizar la distribución de probabilidad del tiempo de ejecución (`T`) incluyen el límite inferior o tiempo óptimo (T_min), el tiempo promedio como métrica de tendencia central (T_promedio), y el límite superior o peor escenario registrado (T_max), este último crítico para evaluar la previsibilidad del sistema en entornos de tiempo real.
+
+### Configuración
+
+Las pruebas se desplegaron sobre una arquitectura de hardware x86_64 dotada de núcleos físicos hiper-entrelazados (Hyper-Threading). El entorno de software y compilación se configuró bajo las siguientes especificaciones:
+
+* **Entorno Operativo:** Microsoft Windows 11, operando bajo un esquema de planificación de hilos de prioridad dinámica.
+* **Implementación OpenMP (C):** Código fuente nativo compilado con soporte para multiprocesamiento de memoria compartida, utilizando barreras de sincronización implícitas al final de las regiones paralelas.
+* **Implementación SIMD (C):** Uso de registros vectoriales nativos de la CPU a través de funciones intrínsecas, permitiendo la ejecución de una sola instrucción sobre múltiples datos de punto flotante en un único ciclo de reloj.
+* **Implementación Python:** Entorno de ejecución interpretado bajo la implementación de referencia CPython, caracterizado por la presencia del mecanismo de exclusión mutua GIL.
+
+<CalloutBlock
+  type="warning"
+  title="Impacto del Context Switch y el GIL"
+  content="A medida que el número de hilos excede la cantidad de núcleos físicos disponibles en el hardware, el planificador del sistema operativo se ve forzado a realizar un sobre-muestreo de cambios de contexto (Context Switching). En el caso de Python, este fenómeno se ve agravado por la serialización forzosa del GIL, lo que transforma el paralelismo real en un esquema de concurrencia competitiva por el núcleo."
+/>
+
+## Resultados
+
+### Categorización de tiempos
+
+En la tabla correspondiente al Caso B, se presenta un resumen detallado de los tiempos de ejecución obtenidos tras realizar las 100 corridas programadas para cada configuración. El formato facilita la identificación inmediata de los límites de escalabilidad, permitiendo contrastar directamente cómo afecta la asignación de más hilos al tiempo de procesamiento bajo un mismo entorno de hardware.
+
+<AcademicTable
+  tableNumber={1}
+  data={{
+    caption: "Categorización de tiempos promedio, mejor y peor (ms) para el Caso B: Variación de número de hilos con tamaño de imagen constante. Muestra de 100 corridas.",
+    headers: ["Hilos", "Tipo", "Mejor (ms)", "Promedio (ms)", "Peor (ms)", "Total Corridas"],
+    rows: [
+      ["2",  "OpenMP (C)", "4.4723", "5.2501",  "7.8123",  "100"],
+      ["4",  "OpenMP (C)", "3.8912", "4.8904",  "7.4913",  "100"],
+      ["8",  "OpenMP (C)", "4.4239", "5.3347",  "12.4871", "100"],
+      ["16", "OpenMP (C)", "4.9857", "5.8485",  "11.1917", "100"],
+      ["2",  "Python",     "7.9812", "8.7338",  "26.0909", "100"],
+      ["4",  "Python",     "7.7275", "8.5635",  "10.9112", "100"],
+      ["8",  "Python",     "8.1755", "10.1953", "39.8912", "100"],
+      ["16", "Python",     "9.5780", "10.7420", "24.3328", "100"],
+      ["2",  "SIMD (C)",   "3.7975", "4.4881",  "12.4591", "100"],
+      ["4",  "SIMD (C)",   "3.8857", "4.8663",  "10.1290", "100"],
+      ["8",  "SIMD (C)",   "4.0407", "5.3089",  "11.8562", "100"],
+      ["16", "SIMD (C)",   "4.5572", "5.4472",  "7.7956",  "100"],
+    ],
+    highlightCol: 3,
+  }}
+/>
+
+<ChartContainer
+  figureNumber={1}
+  caption="Distribución e inflexión del tiempo promedio (ms) vs. cantidad de hilos por tecnología. Se evidencia la pérdida de eficiencia por overhead de sincronización."
+>
+ <img src="/resources/CaseB/Grafica_Representativa.png" alt="Gráfico de rendimiento" style={{ width: '100%', height: 'auto' }} />
+</ChartContainer>
+
+## Conclusiones
+
+Las respuestas de Jairo y Jeo son las que mejor predicen el comportamiento real del sistema, siendo la de Jairo la más exacta: “Los datos demuestran que añadir hilos no mejora el rendimiento indefinidamente; por el contrario, existe un punto de inflexión óptimo (4 hilos para OpenMP y Python, y 2 hilos para SIMD)“, donde se obtienen los menores tiempos promedio (4.89 ms, 8.56 ms y 4.48 ms respectivamente). A partir de ahí, al subir a 8 y 16 hilos, el rendimiento empeora y los tiempos se elevan. Esto ocurre porque el tamaño de la imagen es fijo y el trabajo se fragmenta tanto que el sistema operativo gasta más tiempo y recursos en la administración, sincronización y "cambios de contexto" de los hilos (overhead), que en el procesamiento real de los píxeles.
+
+En el apartado de software, Windows debe gestionar la sobrecarga de hilos, lo que dispara la inestabilidad. Esto se evidencia de forma crítica en los "peores tiempos" de la tabla: con 8 hilos, OpenMP sufre un pico de retraso de 12.48 ms y Python se dispara hasta unos alarmantes 39.89 ms, bloqueado además por su GIL (Global Interpreter Lock), que impide el verdadero paralelismo multifilamento en la CPU.
+
+Para romper esta barrera física y de software, la estrategia más efectiva no es añadir más hilos, sino incrementar el tamaño del problema (Escalamiento de Gustafson); si se procesa una imagen mucho más grande, el tiempo de cómputo por hilo justificará plenamente el costo de organizarlos. Como dato curioso y contundente que arrojan las métricas, la tecnología SIMD en C con solo 2 hilos logra un tiempo excelente de 4.48 ms, superando incluso a OpenMP con 2 hilos (5.25 ms); esto demuestra que el aprovechamiento de los vectores de la propia CPU es inicialmente más limpio y eficiente que saturar prematuramente el sistema con paralelismo a nivel de hilos.
+
+Podemos decir que los tiempos de ejecución no mejorarán de forma indefinida ni lineal; al contrario, presentarán un comportamiento de campana o punto de inflexión óptimo donde se alcanzan las mayores eficiencias. Más allá de este límite, condicionado por los núcleos físicos del hardware y el overhead de software en la gestión de hilos, incrementar la cantidad de hilos a 8 o 16 provocará una degradación progresiva de los tiempos promedio y disparará la inestabilidad en los peores tiempos de respuesta. Esto demuestra que, para un tamaño de carga constante y reducido, el costo del sistema operativo para fragmentar, sincronizar y realizar cambios de contexto supera por completo el beneficio de la paralelización. 
