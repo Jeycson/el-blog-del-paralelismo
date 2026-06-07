@@ -9,12 +9,13 @@ export const PROJECT_META = {
   mentor: {
     name: "Dr. J. Jesùs Arellano Pimentel",
     role: "Profesor Titular & Mentor de Investigación",
+    photo : "/mentor.jpg", 
   },
   members: [
-    { name: "Jeycson Hernández", role: "Investigador Principal" },
-    { name: "Jeovani Pacheco Rueda", role: "Investigador SNII III" },
-    { name: "Mariana Palacios Trinidad", role: "Investigador" },
-    { name: "Jairo Iván Hipolito Morales", role: "Investigador" },
+    { name: "Jeycson Hernández", role: "Investigador Principal", photo: "/jeycson.jpg"},
+    { name: "Jeovani Pacheco Rueda", role: "Investigador", photo: "/jeovani.jpg" },
+    { name: "Mariana Palacios Trinidad", role: "Investigador", photo: "/mariana.jpg" },
+    { name: "Jairo Iván Hipolito Morales", role: "Investigador", photo: "/jairo.jpg" },
   ],
   abstract:
     "Este proyecto documenta una serie de experimentos controlados sobre el comportamiento de aplicaciones de cómputo intensivo bajo distintos paradigmas de paralelismo: SIMD, OpenMP, hilos POSIX y CPython. Evaluamos SpeedUp, eficiencia y overhead en entornos de hardware heterogéneo, con el objetivo de establecer métricas reproducibles y recomendaciones prácticas para el diseño de software de alto rendimiento.",
@@ -110,7 +111,7 @@ export const ARTICLES: Article[] = [
     authors: [
       {
         name: "Jeovani Pacheco Rueda",
-        role: "Investigador SNII III",
+        role: "Investigador",
         institution: "Unistmo",
       },
     ],
@@ -173,7 +174,7 @@ export const ARTICLES: Article[] = [
     authors: [
       {
         name: "Jeovani Pacheco Rueda",
-        role: "Investigador SNII III",
+        role: "Investigador",
         institution: "Unistmo",
       },
     ],
