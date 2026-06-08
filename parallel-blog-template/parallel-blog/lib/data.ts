@@ -7,8 +7,8 @@ export const PROJECT_META = {
   faculty: "Ingeniería en Computación",
   semester: "Ciclo 2025-2026 B",
   mentor: {
-    name: "Dr. J. Jesùs Arellano Pimentel",
-    role: "Profesor Titular & Mentor de Investigación",
+    name: "Dr. J. Jesús Arellano Pimentel",
+    role: "Doctor en Educación con Tecnologías del Aprendizaje y el Conocimiento - Profesor Titular",
     photo : "/mentor.jpg", 
   },
   members: [
@@ -400,6 +400,37 @@ export const HYPOTHESES: HypothesisQuestion[] = [
   {
     id: "q6",
     number: 6,
+    question: 
+      "¿Qué va a ocurrir con el Speedup a medida que se incremente el número de hilos y se mantenga el tamaño de la imagen en cada sistema operativo?",
+    entries: [
+      {
+        author: "Jeovani Pacheco",
+        initials: "JP",
+        response: 
+          "Pues con el Speedup va ir mejorando de manera progresiva, pero igual manera, muchos hilos puede que el incremento de tiempo ya no mejore casi nada.",
+      },
+      {
+        author: "Jeycson López",
+        initials: "JL",
+        response: "Opino que se va a mantener, o tal vez no haya un aumento considerable, obtendremos speedup de 3x o 2x en ambos sistemas operativos.",
+      },
+      {
+        author: "Mariana Palacios",
+        initials: "MP",
+        response:
+          "En principio, va a ser mejor que los que tienen mejores hilos, pero,en algún punto irá disminuyendo esa mejora, a veces más hilos significa menor rendimiento."
+      },
+      {
+        author: "Jairo Hipólito",
+        initials: "JH",
+        response:
+          "Puede que con mayor cantidad de hilos, el trabajo sea tan poquito que la PC va a gastar más tiempo repartiendo los pedacitos de imagen a cada uno.",
+      },
+    ],
+  },
+  {
+    id: "q7",
+    number: 7,
     question:
       "¿Qué código reportará mejor SpeedUp: el generado por IA en Python o la versión en C/C++? Explicar por qué.",
     entries: [
