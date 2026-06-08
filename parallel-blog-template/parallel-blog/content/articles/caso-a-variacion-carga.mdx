@@ -133,6 +133,11 @@ def ejecutar_corrida_completa(ruta_imagen, num_hilos, factor_brillo=50):
     for hilo in lista_hilos:
         hilo.join()
 ```
+<CalloutBlock
+  type="note"
+  title="Uso del código completo"
+  content="El código completo de las implementaciones se encuentra disponible en el repositorio de GitHub asociado a este artículo."
+/>
 ## Dataset
 
 Para esta prueba se utilizaron las siguientes imagenes:
@@ -157,28 +162,192 @@ Para esta prueba se utilizaron las siguientes imagenes:
 
 ## Resultados
 
-### Tabla de tiempos
-
 <AcademicTable
   tableNumber={1}
   data={{
-    caption: "Tiempos promedio (ms) para N = 10 elementos. Mediana de 30 repeticiones.",
-    headers: ["Implementación", "(ms)", "(ms)", "SpeedUp", "Eficiencia"],
+    caption: "Tiempos promedio de cada configuración en milisegundos",
+    headers: ["Implementación", "Imagen mediana", "Imagen grande", "Imagen muy grande"],
     rows: [
-      ["Secuencial",     "4 820", "42", "1.00", "100%"],
-      ["SIMD AVX2",      "1 210", "18", "3.98", "99.5%"],
-      ["OpenMP 8 hilos", "820",   "22", "5.88", "73.5%"],
+      ["Secuencial", "38.357483",	"150.482176",	"338.646193"],
+      ["SIMD (sin hilos)", "0.642523",	"2.315324",	"4.441641"],
+      ["SIMD (2 hilos)", "1.053907",	"2.661066",	"4.706539"],
+      ["SIMD (4 hilos)", "1.09992",	"2.729377",	"4.790638"],
+      ["SIMD (8 hilos)", "1.333802",	"2.748411",	"5.024085"],
+      ["SIMD (16 hilos)", "1.841482",	"2.873599",	"5.233273"],
+      ["OMP (2 hilos)", "0.816649",	"2.298226",	"4.442567"],
+      ["OMP (4 hilos)", "0.845589",	"2.356361",	"4.474266"],
+      ["OMP (8 hilos)", "1.064913",	"2.527191",	"4.572371"],
+      ["OMP (16 hilos)", "1.494788",	"2.900523",	"4.953098"],
+      ["IA Python (1 hilo)", "3.905293",	"11.784089",	"23.597951"],
+      ["IA Python (2 hilos)", "3.629186",	"8.578471",	"17.907092"],
+      ["IA Python (4 hilos)", "4.211867",	"7.930996",	"15.812024"],
+      ["IA Python (8 hilos)", "4.588358",	"9.044231",	"16.072112"],
+      ["IA Python (16 hilos)", "8.561315",	"10.891766",	"20.831119"]
     ],
-    highlightCol: 3,
+    highlightCol: 0,
   }}
 />
 
-<ChartContainer
-  figureNumber={1}
-  caption="Distribución del SpeedUp en 30 repeticiones. Los bigotes indican IQR x 1.5."
->
-  <ChartPlaceholder type="boxplot" label="SpeedUp por implementación" />
-</ChartContainer>
+<AcademicTable
+  tableNumber={2}
+  data={{
+    caption: "Mejores tiempos de cada configuración en milisegundos",
+    headers: ["Implementación", "Imagen mediana", "Imagen grande", "Imagen muy grande"],
+    rows: [
+      ["Secuencial", "37.0273",	"148.3726",	"334.6715"],
+      ["SIMD (sin hilos)", "0.5156",	"1.4957",	"3.5145"],
+      ["SIMD (2 hilos)", "0.5907",	"1.7394",	"3.7406"],
+      ["SIMD (4 hilos)", "0.6327",	"1.8224",	"3.9708"],
+      ["SIMD (8 hilos)", "0.7772",	"1.8564",	"4.0055"],
+      ["SIMD (16 hilos)", "1.285",	"1.9742",	"4.1447"],
+      ["OMP (2 hilos)", "0.511",	"1.4806",	"3.4919"],
+      ["OMP (4 hilos)", "0.5626",	"1.4853",	"3.4361"],
+      ["OMP (8 hilos)", "0.5632",	"1.617",	"3.6646"],
+      ["OMP (16 hilos)", "0.8779",	"2.0009",	"3.9629"],
+      ["IA Python (1 hilo)", "3.0041",	"9.7167",	"20.8112"],
+      ["IA Python (2 hilos)", "2.565899999",	"7.0269",	"14.665"],
+      ["IA Python (4 hilos)", "2.7663",	"6.7786",	"12.7594"],
+      ["IA Python (8 hilos)", "3.5188",	"7.6414",	"13.5697"],
+      ["IA Python (16 hilos)", "4.4075",	"8.2455",	"15.11"]
+    ],
+    highlightCol: 0,
+  }}
+/>
+
+<AcademicTable
+  tableNumber={3}
+  data={{
+    caption: "Peores tiempos de cada configuración en milisegundos",
+    headers: ["Implementación", "Imagen mediana", "Imagen grande", "Imagen muy grande"],
+    rows: [
+      ["Secuencial", "62.8433",	"157.018",	"345.4094"],
+      ["SIMD (sin hilos)", "1.261",	"6.0882",	"8.2039"],
+      ["SIMD (2 hilos)", "1.6486",	"4.2942",	"9.4302"],
+      ["SIMD (4 hilos)", "1.6489",	"3.848",	"9.1824"],
+      ["SIMD (8 hilos)", "2.0013",	"4.9841",	"8.8458"],
+      ["SIMD (16 hilos)", "2.8473",	"4.546",	"9.0804"],
+      ["OMP (2 hilos)", "1.4868",	"5.1404",	"9.0361"],
+      ["OMP (4 hilos)", "1.2649",	"4.8265",	"9.6521"],
+      ["OMP (8 hilos)", "3.0288",	"5.6763",	"7.9355"],
+      ["OMP (16 hilos)", "2.6348",	"14.5844",	"8.9897"],
+      ["IA Python (1 hilo)", "5.881300001",	"14.562",	"38.9668"],
+      ["IA Python (2 hilos)", "5.9563",	"10.3575",	"36.4611"],
+      ["IA Python (4 hilos)", "7.5766",	"10.1704",	"33.9628"],
+      ["IA Python (8 hilos)", "7.2901",	"16.5792",	"27.3671"],
+      ["IA Python (16 hilos)", "97.1916",	"15.166",	"49.1754"]
+    ],
+    highlightCol: 0,
+  }}
+/>
+
+En las tablas 1, 2, 3 se puede apreciar un resumen bastante amplio del tiempo de ejecución de las 100 repeticiones en cada configuración probada. Las tablas presentan la información del tiempo promedio, el mejor y el peor tiempo para cada configuración. 
+De la misma forma, como podemos observar se visualizan en cada tablas los tiempos de procesamiento para los diferentes tamaños de imagen probados.
+<ChartGallery
+  baseFigureNumber={1}
+  caption="Box plots obtenidos tras 100 repeticiones por configuración. El eje Y muestra el tiempo de ejecución en milisegundos."
+  groups={[
+    {
+      id: "secuencial",
+      title: "Secuencial",
+      images: [
+        {
+          src: "/resources/CaseA/Secuencial.png",
+          alt: "Diagrama de cajas y bigotes — implementación secuencial (baseline)",
+          label: "Baseline",
+        },
+      ],
+    },
+    {
+      id: "simd",
+      title: "SIMD",
+      images: [
+        {
+          src: "/resources/CaseA/SIMD (sin hilos).png",
+          alt: "Box plot SIMD sin hilos",
+          label: "Sin hilos",
+        },
+        {
+          src: "/resources/CaseA/SIMD (2 hilos).png",
+          alt: "Box plot SIMD con 2 hilos",
+          label: "2 hilos",
+        },
+        {
+          src: "/resources/CaseA/SIMD (4 hilos).png",
+          alt: "Box plot SIMD con 4 hilos",
+          label: "4 hilos",
+        },
+        {
+          src: "/resources/CaseA/SIMD (8 hilos).png",
+          alt: "Box plot SIMD con 8 hilos",
+          label: "8 hilos",
+        },
+        {
+          src: "/resources/CaseA/SIMD (16 hilos).png",
+          alt: "Box plot SIMD con 16 hilos",
+          label: "16 hilos",
+        },
+      ],
+    },
+    {
+      id: "omp",
+      title: "OMP",
+      images: [
+        {
+          src: "/resources/CaseA/OMP (2 hilos).png",
+          alt: "Box plot OpenMP con 2 hilos",
+          label: "2 hilos",
+        },
+        {
+          src: "/resources/CaseA/OMP (4 hilos).png",
+          alt: "Box plot OpenMP con 4 hilos",
+          label: "4 hilos",
+        },
+        {
+          src: "/resources/CaseA/OMP (8 hilos).png",
+          alt: "Box plot OpenMP con 8 hilos",
+          label: "8 hilos",
+        },
+        {
+          src: "/resources/CaseA/OMP (16 hilos).png",
+          alt: "Box plot OpenMP con 16 hilos",
+          label: "16 hilos",
+        },
+      ],
+    },
+    {
+      id: "python",
+      title: "Python",
+      images: [
+        {
+          src: "/resources/CaseA/IA Python (1 hilo).png",
+          alt: "Box plot Python con 1 hilo",
+          label: "1 hilo",
+        },
+        {
+          src: "/resources/CaseA/IA Python (2 hilos).png",
+          alt: "Box plot Python con 2 hilos",
+          label: "2 hilos",
+        },
+        {
+          src: "/resources/CaseA/IA Python (4 hilos).png",
+          alt: "Box plot Python con 4 hilos",
+          label: "4 hilos",
+        },
+        {
+          src: "/resources/CaseA/IA Python (8 hilos).png",
+          alt: "Box plot Python con 8 hilos",
+          label: "8 hilos",
+        },
+        {
+          src: "/resources/CaseA/IA Python (16 hilos).png",
+          alt: "Box plot Python con 16 hilos",
+          label: "16 hilos",
+        },
+      ],
+    },
+  ]}
+/>
+ 
 
 ## Conclusiones
 
