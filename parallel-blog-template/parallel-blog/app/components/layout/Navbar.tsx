@@ -14,6 +14,13 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
+  const navigationLinks = [
+    { href: "/#articles", label: "Artículos" },
+    { href: "/#hardware", label: "Entornos" },
+    { href: "/#about", label: "Equipo" },
+    { href: "/#hypothesis", label: "Hipótesis" },
+  ] as const;
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -89,7 +96,7 @@ export default function Navbar() {
       {/* Mobile menu */}
       {menuOpen && (
         <div className="md:hidden bg-white border-t border-slate-100 px-6 py-4 flex flex-col gap-4">
-          {[["/#articles", "Artículos"], ["/#hardware", "Entornos"], ["/#hypothesis", "Hipótesis"]].map(([href, label]) => (
+          {navigationLinks.map(({ href, label }) => (
             <Link
               key={href}
               href={href}
