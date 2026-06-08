@@ -12,10 +12,10 @@ export const PROJECT_META = {
     photo : "/mentor.jpg", 
   },
   members: [
-    { name: "Jeycson Hernández", role: "Investigador Principal", photo: "/jeycson.jpg"},
-    { name: "Jeovani Pacheco Rueda", role: "Investigador", photo: "/jeovani.jpg" },
-    { name: "Mariana Palacios Trinidad", role: "Investigador", photo: "/mariana.jpg" },
-    { name: "Jairo Iván Hipolito Morales", role: "Investigador", photo: "/jairo.jpg" },
+    { name: "Jeycson Gabriel López Hernández", role: "Estudiante Ing. Computación", photo: "/jeycson.jpg"},
+    { name: "Jeovani Pacheco Rueda", role: "Estudiante Ing. Computación", photo: "/jeovani.jpg" },
+    { name: "Mariana Palacios Trinidad", role: "Estudiante Ing. Computación", photo: "/mariana.jpg" },
+    { name: "Jairo Iván Hipolito Morales", role: "Estudiante Ing. Computación", photo: "/jairo.jpg" },
   ],
   abstract:
     "Este proyecto documenta una serie de experimentos controlados sobre el comportamiento de aplicaciones de cómputo intensivo bajo distintos paradigmas de paralelismo: SIMD, OpenMP, hilos POSIX y CPython. Evaluamos SpeedUp, eficiencia y overhead en entornos de hardware heterogéneo, con el objetivo de establecer métricas reproducibles y recomendaciones prácticas para el diseño de software de alto rendimiento.",
@@ -120,8 +120,8 @@ export const ARTICLES: Article[] = [
     authors: [
       {
         name: "Jeycson Gabriel López Hernández",
-        role: "Estudiante de Ing. en Computación",
-        institution: "UNISTMO",
+        role: "Estudiante de Ing. Computación",
+        institution: "Unistmo",
       }
     ],
     date: "2026-06-6",
@@ -139,7 +139,7 @@ export const ARTICLES: Article[] = [
     authors: [
       {
         name: "Jeovani Pacheco Rueda",
-        role: "Investigador",
+        role: "Estudiante de Ing. Computación",
         institution: "Unistmo",
       },
     ],
@@ -158,8 +158,8 @@ export const ARTICLES: Article[] = [
     authors: [
       {
         name: "Mariana Palacios Trinidad",
-        role: "Estudiante de Ing. en Computación",
-        institution: "UNISTMO",
+        role: "Estudiante de Ing. Computación",
+        institution: "Unistmo",
       },
     ],
     date: "2026-06-07",
@@ -177,9 +177,9 @@ export const ARTICLES: Article[] = [
     tags: ["Cache", "perf", "Cachegrind", "BLAS", "Localidad"],
     authors: [
       {
-        name: "Jeycson Hernández",
-        role: "Investigador Principal",
-        institution: "BUAP",
+        name: "Jeycson Gabriel López Hernández",
+        role: "Estudiante de Ing. Computación",
+        institution: "Unistmo",
       },
     ],
     date: "2025-04-22",
@@ -197,7 +197,7 @@ export const ARTICLES: Article[] = [
     authors: [
       {
         name: "Jeovani Pacheco Rueda",
-        role: "Investigador",
+        role: "Estudiante Ing. Computación",
         institution: "Unistmo",
       },
     ],
