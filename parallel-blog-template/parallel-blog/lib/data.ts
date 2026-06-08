@@ -1,4 +1,4 @@
-import { Article, HardwareSpec } from "@/types";
+import { Article, HardwareSpec, HypothesisQuestion } from "@/types";
 
 export const PROJECT_META = {
   title: "Computación Paralela & Sistemas Distribuidos",
@@ -225,3 +225,210 @@ export const ARTICLES: Article[] = [
     hardware: ["env-a", "env-b"], 
   },
 ];
+
+export const HYPOTHESIS_META = {
+  title: "Hipótesis previas al experimento",
+  description:
+    "Antes de ejecutar las pruebas, cada integrante del equipo formuló su predicción para las seis preguntas de investigación. Las respuestas se registran sin modificaciones para poder contrastarlas con los resultados reales.",
+  course: "Sistemas de Cómputo Paralelo y Distribuido",
+  institution: "Universidad del Istmo — UNISTMO Tehuantepec",
+  group: "Grupo 804 · Tercer Parcial · 30 de mayo de 2026",
+  docente: "Dr. Jesús Arellano Pimentel",
+};
+ 
+export const HYPOTHESES: HypothesisQuestion[] = [
+  {
+    id: "q1",
+    number: 1,
+    question:
+      "¿Cómo se van a comportar los tiempos de ejecución si se mantiene el código pero se varía el tamaño de la imagen a procesar en cada configuración? ¿Existe variación y cómo se explica?",
+    entries: [
+      {
+        author: "Jeovani Pacheco",
+        initials: "JP",
+        response:
+          "Lógicamente el tamaño afectará el rendimiento de cada hilo, ya que se trabaja con más datos. En cada configuración de hilos el rendimiento va a mejorar; es mejor tener 4 que solo 2 hilos. Pero puede que el incremento de tiempo ya no sea tan notorio para 16 hilos en comparación con 8, lo que significa que muchos hilos solo puede afectar a la CPU sin mejorar el tiempo.",
+      },
+      {
+        author: "Jeycson López",
+        initials: "JL",
+        response:
+          "El tiempo de ejecución va a estar ligado directamente con el tamaño de la imagen hasta cierto punto, donde aunque hagamos más o más pequeña la imagen se va a mantener un tiempo fijo. No creo que existan variaciones ya que es bastante determinista lo que va a pasar; es como tener que hacer un hoyo: si hay más trabajadores, se puede hacer más rápido para un tamaño fijo.",
+      },
+      {
+        author: "Mariana Palacios",
+        initials: "MP",
+        response:
+          "Tendría sentido que el tiempo de ejecución incremente debido al tamaño de la imagen por la cantidad de píxeles a procesar en cada incremento que se le haga a la misma.",
+      },
+      {
+        author: "Jairo Hipólito",
+        initials: "JH",
+        response:
+          "Con mayor tamaño de imagen el tiempo va a aumentar porque hay más que procesar. Sin embargo, el tiempo no subirá de forma exacta o limpia.",
+      },
+    ],
+  },
+  {
+    id: "q2",
+    number: 2,
+    question:
+      "¿Cómo se van a comportar los tiempos de ejecución al incrementar el número de hilos con un mismo tamaño de imagen a procesar?",
+    entries: [
+      {
+        author: "Jeovani Pacheco",
+        initials: "JP",
+        response:
+          "Los tiempos con los hilos mejorarán de manera progresiva, pero considero que en algún punto ese tiempo no será notorio en tanto a mejoría, y solo estaríamos forzando más a la CPU.",
+      },
+      {
+        author: "Jeycson López",
+        initials: "JL",
+        response:
+          "Los tiempos de ejecución se van a mantener más o menos similares sin importar cuántos hilos se levanten, ya que siempre se debe esperar hasta que el último hilo acabe de trabajar para contabilizar el tiempo total.",
+      },
+      {
+        author: "Mariana Palacios",
+        initials: "MP",
+        response:
+          "Los tiempos de ejecución desde cierto punto pueden ser mejores (más bajos), porque si se divide el trabajo se completaría con más facilidad. Pero el tiempo también puede estar ligado a la cantidad de núcleos: si solo tienes uno, mientras más ejecutes más división y más lento sería.",
+      },
+      {
+        author: "Jairo Hipólito",
+        initials: "JH",
+        response:
+          "Al principio meter más hilos es de ayuda porque se divide el trabajo. Pero con más hilos el tiempo ya no va a mejorar y puede que hasta empeore, porque la computadora va a gastar más tiempo organizando y mandando los pedacitos de imagen a cada hilo que lo que los hilos tardan en hacer el trabajo real.",
+      },
+    ],
+  },
+  {
+    id: "q3",
+    number: 3,
+    question:
+      "Si Linux está ejecutándose en VirtualBox sobre Windows 11, ¿cómo se espera que se comporte respecto al sistema nativo para una misma configuración de hilos y tamaño de imagen?",
+    entries: [
+      {
+        author: "Jeovani Pacheco",
+        initials: "JP",
+        response:
+          "No afectará el rendimiento de Windows, ya que en una máquina virtual se limita el número de núcleos que puede ocupar. Si configuro VB con 4 núcleos de mis 8 disponibles, ese será el límite: sigue funcionando normal, solo que el rendimiento no será completo.",
+      },
+      {
+        author: "Jeycson López",
+        initials: "JL",
+        response:
+          "Los tiempos van a ser peores en la máquina virtual, porque existe una capa de abstracción por la que la VM se comunica con el sistema. No es lo mismo que ejecutarlo completamente nativo y optimizado para el kernel de Linux.",
+      },
+      {
+        author: "Mariana Palacios",
+        initials: "MP",
+        response:
+          "Los tiempos de Windows 11 van a ser mejores. Las máquinas virtuales de por sí son más lentas ejecutando tareas comunes en comparación con lo que está instalado directamente en la máquina.",
+      },
+      {
+        author: "Jairo Hipólito",
+        initials: "JH",
+        response:
+          "Windows 11 va a ser más rápido que Linux en máquina virtual. Al estar instalado directamente, Windows puede usar todo el procesador sin pedirle permiso a nadie. En cambio, Linux en VirtualBox tiene que dar muchas vueltas para hacer una sola tarea.",
+      },
+    ],
+  },
+  {
+    id: "q4",
+    number: 4,
+    question:
+      "Si Windows está ejecutándose en VirtualBox sobre Linux, ¿cómo se espera que se comporte respecto al sistema nativo para una misma configuración de hilos y tamaño de imagen?",
+    entries: [
+      {
+        author: "Jeovani Pacheco",
+        initials: "JP",
+        response:
+          "Funcionará de manera similar a tener VB en Windows, pero aquí depende de quién corra mejor VirtualBox. Yo pensaría que Linux lo ejecuta de mejor manera.",
+      },
+      {
+        author: "Jeycson López",
+        initials: "JL",
+        response:
+          "Ejecutar Windows en VirtualBox sobre Linux es algo criminal. Los tiempos de ejecución van a ser incluso peores que si se tratara de una máquina virtual de Linux sobre Windows.",
+      },
+      {
+        author: "Mariana Palacios",
+        initials: "MP",
+        response:
+          "Los tiempos de Windows en este caso serán peores, por lo mismo que mencioné antes: las máquinas virtuales son más lentas. Además, Windows tiende a tener peores tiempos de ejecución y utiliza más recursos.",
+      },
+      {
+        author: "Jairo Hipólito",
+        initials: "JH",
+        response:
+          "El ganador sería el nativo, o sea Linux. Pasaría lo mismo que la pregunta anterior: una máquina virtual tiende a ser lenta. Además, Windows es un sistema que consume más recursos de por sí.",
+      },
+    ],
+  },
+  {
+    id: "q5",
+    number: 5,
+    question:
+      "¿Qué va a ocurrir con el SpeedUp a medida que se incremente el tamaño de las imágenes en cada sistema operativo, pero con el mismo número de hilos por prueba?",
+    entries: [
+      {
+        author: "Jeovani Pacheco",
+        initials: "JP",
+        response:
+          "De forma secuencial el tiempo va a aumentar, y pienso que el valor de SpeedUp va disminuyendo. Aunque usemos hilos, el trabajo mejora pero no siempre tiene un límite claro por el mismo número de hilos limitados.",
+      },
+      {
+        author: "Jeycson López",
+        initials: "JL",
+        response:
+          "A medida que se incremente el número de hilos en Linux e incrementen las imágenes, habrá mejores SpeedUp que en Windows. A medida que aumentamos los hilos se aligera la carga, aunque en Linux tal vez veamos SpeedUp mayores de 20× frente a 10× en Windows.",
+      },
+      {
+        author: "Mariana Palacios",
+        initials: "MP",
+        response:
+          "El SpeedUp puede aumentar en la forma secuencial, y quizás en la paralela también, pero en comparación con la secuencial se mantendrá un poco más abajo en ambos sistemas operativos.",
+      },
+      {
+        author: "Jairo Hipólito",
+        initials: "JH",
+        response:
+          "El SpeedUp va a ser mejor y más alto con las imágenes más grandes. Cuando la imagen es pequeña, la computadora tarda casi lo mismo en crear los hilos que en procesarla. Con imágenes grandes, la ventaja de repartir la tarea se notará muchísimo más.",
+      },
+    ],
+  },
+  {
+    id: "q6",
+    number: 6,
+    question:
+      "¿Qué código reportará mejor SpeedUp: el generado por IA en Python o la versión en C/C++? Explicar por qué.",
+    entries: [
+      {
+        author: "Jeovani Pacheco",
+        initials: "JP",
+        response:
+          "Lógicamente el de C/C++ ya que es un lenguaje donde se puede administrar la memoria de forma local. En Python no tenemos esa libertad y por lo mismo te olvidas del lado de la optimización.",
+      },
+      {
+        author: "Jeycson López",
+        initials: "JL",
+        response:
+          "La versión de C/C++ va a ser mejor. Al ser un lenguaje compilado se ensambla de manera más orgánica con el hardware, y al trabajar con hilos obtiene mayores SpeedUp.",
+      },
+      {
+        author: "Mariana Palacios",
+        initials: "MP",
+        response:
+          "Se puede tener un mejor tiempo en C/C++ porque es un lenguaje compilado con más acceso a recursos del sistema. Aunque si Python se optimiza bastante, capaz puede llegar a ser mejor.",
+      },
+      {
+        author: "Jairo Hipólito",
+        initials: "JH",
+        response:
+          "El código en C/C++ tendrá un mejor SpeedUp por ser un lenguaje que trabaja más directo con la computadora.",
+      },
+    ],
+  },
+];
+ 
+

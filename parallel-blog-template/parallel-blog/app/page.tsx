@@ -2,6 +2,7 @@ import HeroSection from "./components/ui/HeroSection";
 import HardwareCard from "./components/ui/HardwareCard";
 import ArticleCard from "./components/ui/ArticleCard";
 import { ARTICLES, HARDWARE_SPECS, PROJECT_META } from "@/lib/data";
+import HipotesisPage from "./hipotesis/page";
 
 export default function HomePage() {
   return (
@@ -47,6 +48,23 @@ export default function HomePage() {
           {ARTICLES.map((article, i) => (
             <ArticleCard key={article.slug} article={article} index={i} />
           ))}
+        </div>
+      </section>
+
+      <section
+      id="hypothesis"
+      className="px-6 lg:px-10 max-w-7xl mx-auto pb-24"
+      aria-labelledby="hypothesis-heading"
+    >
+       <div className="h-px bg-slate-200 mb-16" />
+        <SectionHeader 
+          overline="Hipótesis de Investigación"
+          title="Hipótesis Formuladas"
+          description="Las siguientes hipótesis fueron formuladas para guiar el análisis y la evaluación de los experimentos realizados."
+          id="hypothesis-heading"
+        />
+        <div className="space-y-6">
+          <HipotesisPage></HipotesisPage>
         </div>
       </section>
 

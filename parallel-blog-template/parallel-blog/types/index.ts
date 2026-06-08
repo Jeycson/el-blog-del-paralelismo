@@ -1,3 +1,5 @@
+import { HypothesisEntry } from "@/app/components/article/HypothesisBlock";
+
 export interface Author {
   name: string;
   role: string;
@@ -49,4 +51,11 @@ export interface Callout {
   type: "note" | "warning" | "insight" | "definition";
   title: string;
   content: string;
+}
+
+export interface HypothesisQuestion{
+  id: string;
+  number: number;
+  question: string;
+  entries: HypothesisEntry[];
 }
