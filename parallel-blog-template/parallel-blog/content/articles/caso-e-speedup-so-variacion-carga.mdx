@@ -1,1 +1,417 @@
-## hola
+export const metadata = {
+  toc: [
+    { id: 'introducción',  title: 'Introducción',            level: 1 },
+    { id: 'configuración', title: 'Configuración',           level: 1 },
+    { id: 'dataset', title: 'Dataset',           level: 1 },
+    { id: 'resultados',    title: 'Resultados',              level: 1 },
+    { id: 'conclusiones',  title: 'Conclusiones',            level: 1 },
+  ]
+}
+
+## Introducción
+
+En este caso de estudio se presenta un análisis exhaustivo del impacto del tamaño de la imagen
+en el rendimiento de diferentes implementaciones de un algoritmo de procesamiento de imágenes (brillo)
+en Windows 11. Se evalúan tres enfoques: una implementación secuencial, una optimizada con SIMD y una 
+paralelizada con OpenMP, además de una versión en Python. En todas las implementaciónes, a excepción de la
+secuencial por obvios motivos, se utilizaron 8 hilos, esto debido a que la máquina donde se ejecutó el estudio 
+tiene 8 núcleos. El objetivo es determinar cómo varía el tiempo de ejecución al procesar imágenes de diferentes 
+tamaños (mediana, grande y muy grande) y comparar los resultados entre las distintas configuraciones.
+
+## Configuración
+
+Para el caso de estudio actual se emplearon las diferentes configuraciones:
+
+**1. Implementación secuencial en Windows 11**
+```
+void BMP::brightness(const int u)
+{
+	if (u == 0 && !isImageLoaded) return;
+
+
+	for (int y = 0; y < header.height; y++) {
+		for (int x = 0; x < header.width; x++) {
+
+
+			Color color = getPixel(x, y);
+
+
+			color.r = CLAMP(color.r + u);
+			color.g = CLAMP(color.g + u);
+			color.b = CLAMP(color.b + u);
+
+
+			setPixel(x, y, color);
+		}
+	}
+}
+```
+**2. Implementación en SIMD con 8 hilos en Windows 11**
+```
+for(i = 0; i < NUM_HILOS; i++) {
+		datos[i].gimg = bmp.getImageData() + (sizeof(BYTE) * (bmp.getImageSize() / NUM_HILOS) * i);
+		datos[i].size = bmp.getImageSize() / NUM_HILOS;
+		memcpy(datos[i].u, u, 16);
+		hThread[i] = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)hilo, &datos[i], 0, dThreadId);
+
+		if(hThread[i] == NULL) {
+			printf("Error al crear el hilo %d\n", i);
+			return 1;
+		}	
+	}
+
+for (i = 0; i < NUM_HILOS; i++) {
+  WaitForSingleObject(hThread[i], INFINITE);
+  CloseHandle(hThread[i]);
+}
+```
+**3. Implementación en OMP con 8 hilos en Windows 11**
+```
+omp_set_num_threads(NUM_HILOS);
+
+#pragma omp parallel for private(i)
+	for(i = 0; i < NUM_HILOS; i++) {
+		BYTE* gimp_ptr = base_img + (chunck_size * i);
+		brightness_xmmw(u, gimp_ptr, chunck_size);
+	}
+```
+**4. Implementación en Python con 8 hilos**
+```
+def ejecutar_corrida_completa(ruta_imagen, num_hilos, factor_brillo=50):
+    img = cv2.imread(ruta_imagen)
+    if img is None:
+        return None
+        
+    alto, ancho, _ = img.shape
+    vector_brillo = np.array([factor_brillo, factor_brillo, factor_brillo], dtype=np.uint8)
+    img_brillo = np.zeros_like(img)
+    
+    t_inicio = time.perf_counter()
+    
+    # 2. Creación y lanzamiento de hilos
+    filas_por_hilo = alto // num_hilos
+    lista_hilos = []
+    
+    for j in range(num_hilos):
+        inicio_fila = j * filas_por_hilo
+        fin_fila = alto if (j == num_hilos - 1) else (j + 1) * filas_por_hilo
+        
+        hilo = threading.Thread(
+            target=procesar_bloque_brillo,
+            args=(img, inicio_fila, fin_fila, vector_brillo, img_brillo)
+        )
+        lista_hilos.append(hilo)
+        hilo.start()
+        
+    # 3. Sincronización
+    for hilo in lista_hilos:
+        hilo.join()
+```
+**5. Implementación Secuencial en Linux**
+Se utiliza la misma implementación secuencial que en Windows, pero compilada y ejecutada en un entorno Linux (Ubuntu).
+
+**6. Implementación en SIMD con 8 hilos en Linux**
+```
+    for (int i = 0; i < NUM; i++)
+    {
+        datos[i].gimg = bmp.getPImageData() + (sizeof(BYTE) * (bmp.getImageSize() / NUM) * i);
+        datos[i].size = bmp.getImageSize() / NUM;
+        std::memcpy(datos[i].u, u, 16);
+        
+        hilos.push_back(std::thread(hilo, &datos[i]));
+    }
+
+    for (int i = 0; i < NUM; i++)
+    {
+        if (hilos[i].joinable()) {
+            hilos[i].join();
+        }
+    }
+```
+**7. Implementación en OMP con 8 hilos en Linux**
+```
+omp_set_num_threads(NUM);
+#pragma omp parallel for schedule(static)
+    for (int i = 0; i < size; i++) {
+        int temp = data[i] + 50;
+        if (temp > 255) data[i] = 255;
+        else if (temp < 0) data[i] = 0;
+        else data[i] = (BYTE)temp;
+    }
+```
+<CalloutBlock
+  type="note"
+  title="Uso del código completo"
+  content="El código completo de las implementaciones se encuentra disponible en el repositorio de GitHub asociado a este artículo."
+/>
+## Dataset
+
+Para esta prueba se utilizaron las siguientes imagenes:
+<ArticleImage 
+  src="/nature.jpg" 
+  alt="Imagen mediana"
+  height="100px"
+  caption="Figura 1: Imagen Mediana (1240 x 930 píxeles)"
+/>
+<ArticleImage 
+  src="/nature.jpg" 
+  alt="Imagen grande"
+  height="200px"
+  caption="Figura 2: Imagen Grande (2480 x 1860 píxeles)"
+/>
+<ArticleImage 
+  src="/nature.jpg" 
+  alt="Imagen muy grande"
+  height="300px"
+  caption="Figura 2: Imagen Muy Grande (3720 x 2790 píxeles)"
+/>
+
+## Resultados
+
+<AcademicTable
+  tableNumber={1}
+  data={{
+    caption: "Tiempos promedio de ejecución en Linux en milisegundos",
+    headers: ["Implementación", "Imagen mediana", "Imagen grande", "Imagen muy grande"],
+    rows: [
+      ["Secuencial", "26.9308",	"89.4813",	"196.4635"],
+      ["SIMD (8 hilos)", "0.7976",	"1.9879",	"4.2477"],
+      ["OMP (8 hilos)", "3.5517",	"8.9253",	"18.1496"],
+      ["Python (8 hilos)", "3.4073",	"5.1314",	"8.2699"]
+    ],
+    highlightCol: 0,
+  }}
+/>
+
+<AcademicTable
+  tableNumber={2}
+  data={{
+    caption: "Tiempos promedio de ejecución en Windows en milisegundos",
+    headers: ["Implementación", "Imagen mediana", "Imagen grande", "Imagen muy grande"],
+    rows: [
+      ["Secuencial", "38.3575",	"150.4822",	"338.6462"],
+      ["SIMD (8 hilos)", "1.3338",	"2.7484",	"5.0241"],
+      ["OMP (8 hilos)", "1.0649",	"2.5272",	"4.5724"],
+      ["Python (8 hilos)", "4.5884",	"9.0442",	"16.0721"]
+    ],
+    highlightCol: 0,
+  }}
+/>
+
+<AcademicTable
+  tableNumber={3}
+  data={{
+    caption: "Mejores tiempos de ejecución en Linux en milisegundos",
+    headers: ["Implementación", "Imagen mediana", "Imagen grande", "Imagen muy grande"],
+    rows: [
+      ["Secuencial", "21.0105",	"83.6845",	"188.8248"],
+      ["SIMD (8 hilos)", "0.5253",	"1.7667",	"3.8718"],
+      ["OMP (8 hilos)", "1.9969",	"7.1638",	"15.4322"],
+      ["Python (8 hilos)", "1.7408",	"4.6307",	"7.8453"]
+    ],
+    highlightCol: 0,
+  }}
+/>
+
+<AcademicTable
+  tableNumber={4}
+  data={{
+    caption: "Mejores tiempos de ejecución en Windows en milisegundos",
+    headers: ["Implementación", "Imagen mediana", "Imagen grande", "Imagen muy grande"],
+    rows: [
+      ["Secuencial", "62.8433",	"157.018",	"345.4094"],
+      ["SIMD (8 hilos)", "2.0013",	"4.9841",	"8.8458"],
+      ["OMP (8 hilos)", "3.0288",	"5.6763",	"7.9355"],
+      ["Python (8 hilos)", "7.2901",	"16.5792",	"27.3671"]
+    ],
+    highlightCol: 0,
+  }}
+/>
+
+<AcademicTable
+  tableNumber={5}
+  data={{
+    caption: "Peores tiempos de ejecución en Linux en milisegundos",
+    headers: ["Implementación", "Imagen mediana", "Imagen grande", "Imagen muy grande"],
+    rows: [
+      ["Secuencial", "47.7001",	"177.0750",	"419.9723"],
+      ["SIMD (8 hilos)", "1.3152",	"2.3836",	"5.0720"],
+      ["OMP (8 hilos)", "19.4413",	"14.8898",	"37.2273"],
+      ["Python (8 hilos)", "9.4922",	"8.4541",	"12.5689"]
+    ],
+    highlightCol: 0,
+  }}
+/>
+
+<AcademicTable
+  tableNumber={6}
+  data={{
+    caption: "Peores tiempos de ejecución en Windows en milisegundos",
+    headers: ["Implementación", "Imagen mediana", "Imagen grande", "Imagen muy grande"],
+    rows: [
+      ["Secuencial", "62.8433",	"157.018",	"345.4094"],
+      ["SIMD (8 hilos)", "2.0013",	"4.9841",	"8.8458"],
+      ["OMP (8 hilos)", "3.0288",	"5.6763",	"7.9355"],
+      ["Python (8 hilos)", "7.2901",	"16.5792",	"27.3671"]
+    ],
+    highlightCol: 0,
+  }}
+/>
+
+En las tablas comparativas podemos observar la diferencia entre los tiempos promedios, mejores y peores de cada 
+configuración en los dos sistemas operativos. También se observa el dato de la ejecución secuencial como pudo de 
+partida para calcular el Speedup.
+
+Observamos también como el mejor tiempo de ejecución se lo lleva la configuración en SIMD, en nuestra comparativa 
+de 8 hilos cuando se trata de la imagen mediana y grande.  
+
+En el caso específico de la imagen muy grande, se observa que el mejor tiempo lo obtiene igual la configuración 
+SIMD con 8 hilos pero en su versión de Linux. En el sistema operativo Windows, el mejor tiempo registrado para 
+la imagen muy grande es la implementación en OpenMP con 8 hilos.
+
+<ChartGallery
+  baseFigureNumber={1}
+  caption="Box plots obtenidos tras 100 repeticiones por configuración. El eje Y muestra el tiempo de ejecución en milisegundos."
+  groups={[
+    {
+      id: "secuencial",
+      title: "Secuencial",
+      images: [
+        {
+          src: "/resources/CaseA/Secuencial.png",
+          alt: "Diagrama de cajas y bigotes — implementación secuencial (baseline)",
+          label: "Baseline",
+        },
+      ],
+    },
+    {
+      id: "simd",
+      title: "SIMD",
+      images: [
+        {
+          src: "/resources/CaseA/SIMD (sin hilos).png",
+          alt: "Box plot SIMD sin hilos",
+          label: "Sin hilos",
+        },
+        {
+          src: "/resources/CaseA/SIMD (2 hilos).png",
+          alt: "Box plot SIMD con 2 hilos",
+          label: "2 hilos",
+        },
+        {
+          src: "/resources/CaseA/SIMD (4 hilos).png",
+          alt: "Box plot SIMD con 4 hilos",
+          label: "4 hilos",
+        },
+        {
+          src: "/resources/CaseA/SIMD (8 hilos).png",
+          alt: "Box plot SIMD con 8 hilos",
+          label: "8 hilos",
+        },
+        {
+          src: "/resources/CaseA/SIMD (16 hilos).png",
+          alt: "Box plot SIMD con 16 hilos",
+          label: "16 hilos",
+        },
+      ],
+    },
+    {
+      id: "omp",
+      title: "OMP",
+      images: [
+        {
+          src: "/resources/CaseA/OMP (2 hilos).png",
+          alt: "Box plot OpenMP con 2 hilos",
+          label: "2 hilos",
+        },
+        {
+          src: "/resources/CaseA/OMP (4 hilos).png",
+          alt: "Box plot OpenMP con 4 hilos",
+          label: "4 hilos",
+        },
+        {
+          src: "/resources/CaseA/OMP (8 hilos).png",
+          alt: "Box plot OpenMP con 8 hilos",
+          label: "8 hilos",
+        },
+        {
+          src: "/resources/CaseA/OMP (16 hilos).png",
+          alt: "Box plot OpenMP con 16 hilos",
+          label: "16 hilos",
+        },
+      ],
+    },
+    {
+      id: "python",
+      title: "Python",
+      images: [
+        {
+          src: "/resources/CaseA/IA Python (1 hilo).png",
+          alt: "Box plot Python con 1 hilo",
+          label: "1 hilo",
+        },
+        {
+          src: "/resources/CaseA/IA Python (2 hilos).png",
+          alt: "Box plot Python con 2 hilos",
+          label: "2 hilos",
+        },
+        {
+          src: "/resources/CaseA/IA Python (4 hilos).png",
+          alt: "Box plot Python con 4 hilos",
+          label: "4 hilos",
+        },
+        {
+          src: "/resources/CaseA/IA Python (8 hilos).png",
+          alt: "Box plot Python con 8 hilos",
+          label: "8 hilos",
+        },
+        {
+          src: "/resources/CaseA/IA Python (16 hilos).png",
+          alt: "Box plot Python con 16 hilos",
+          label: "16 hilos",
+        },
+      ],
+    },
+  ]}
+/>
+ 
+En los diagramas de cajas y bigotes se puede observar el comportamiento de las distintas configuraciones en Windows, para diferentes tamaños de imágenes. Se observa un patrón particular que tiende a aumentar el tiempo de ejecución cuando el tamaño de la imagen también aumenta.
+
+## Conclusiones
+
+El comportamiento para cada variación es el mismo. Para todas las hipótesis planteadas se puede decir que fueron aceptadas. 
+
+<ArticleImage 
+  src="/resources/CaseA/OMP (2 hilos).png" 
+  alt="Diagrama de cajas y bigotes — implementación OMP con 2 hilos"
+  caption="Figura 16: Diagrama de cajas y bigotes — implementación OMP con 2 hilos"
+/>
+
+La gráfica anterior, muestra el comportamiento de OpenMP en su versión de 2 hilos, que fue quien obtuvo los tiempos más bajos con las imágenes mediana y grande. En este caso vemos como el tiempo de ejecución incrementa conforme el tamaño de la imagen también lo hace.
+
+<ArticleImage
+  src="/resources/CaseA/Secuencial.png"
+  alt="Diagrama de cajas y bigotes — implementación secuencial (baseline)"
+  caption="Figura 17: Diagrama de cajas y bigotes — implementación secuencial (baseline)"
+/>
+
+Otro caso interesante ocurre en la gráfica del algoritmo secuencial, donde se puede ver claramente que al aumentar el tamaño de la imagen el tiempo de procesamiento se dispara considerablemente, ya que en esta configuración cada píxel extra incrementa la cantidad de trabajo a realizar. 
+Esto concuerda con las 4 hipótesis planteadas por el equipo, por ejemplo en el testimonio de Mariana: 
+>“Tendría sentido que el tiempo de ejecución incremente debido al
+>tamaño de la imagen debido a la cantidad de píxeles a procesar por cada
+>incremento que se le haga a la misma.“
+
+Desde el punto de vista del software y los datos, el tamaño de la imagen dicta directamente el volumen de trabajo.
+
+Complejidad Lineal O(N): El brillo es una operación de píxel a píxel. Si una imagen de 1000 x 1000 tiene 1 millón de píxeles, una de 4000 x 4000 tiene 16 millones. El trabajo no sube de forma lineal con el ancho, sube de forma cuadrática respecto a las dimensiones de la imagen.
+
+Formato BMP y Overhead: El formato BMP no está comprimido. Cada píxel son 3 o 4 bytes (RGB o RGBA). Una imagen de 16 MP en formato de 32 bits (RGBA) pesa unos 64 MB. Mover bloques tan grandes de datos en memoria consume ciclos de reloj que nada tienen que ver con la operación matemática de "sumar brillo".
+
+El procesador puede realizar miles de millones de operaciones por segundo, pero la memoria RAM es drásticamente más lenta.
+
+Cuando procesas una imagen pequeña (ej. 1 MB), toda la imagen cabe en la memoria caché del procesador (L1, L2 o L3). La caché es ultra rápida.
+
+Cuando la imagen es grande (ej. 100 MB), no cabe en la caché. El procesador tiene que ir a buscar los píxeles directamente a la memoria RAM.
+
+El bus de datos de la RAM tiene un "ancho de banda" máximo (ej. 50 GB/s). No importa qué tan rápido sume tu CPU, tiene que sentarse a esperar a que la RAM le entregue los siguientes píxeles. Esto se conoce como Cache Miss (fallo de caché).
+Para romper esta barrera en imágenes gigantescas, la industria no usa más hilos de CPU; traslada el procesamiento a la GPU (tarjeta gráfica) mediante CUDA o OpenCL. Las GPUs tienen miles de núcleos pequeños pero, lo más importante, cuentan con una memoria VRAM con un ancho de banda masivo (a veces más de 1000 GB/s) diseñado específicamente para mover millones de píxeles en paralelo. 
