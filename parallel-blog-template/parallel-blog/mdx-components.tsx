@@ -4,6 +4,7 @@ import type { MDXComponents } from 'mdx/types'
   import CalloutBlock from '@/app/components/article/CalloutBlock'
   import ChartContainer, { ChartPlaceholder } from '@/app/components/article/ChartContainer'
   import ArticleImage from '@/app/components/article/ArticleImage'
+  import ChartGallery from '@/app/components/article/ChartGallery'
   export function useMDXComponents(components: MDXComponents): MDXComponents {
     return {
       ...components,
@@ -13,6 +14,7 @@ import type { MDXComponents } from 'mdx/types'
       ChartContainer,
       ChartPlaceholder,
       ArticleImage,
+      ChartGallery,
 
       // Tus overrides de diseño HTML nativo
       h2: ({ children, ...props }) => (

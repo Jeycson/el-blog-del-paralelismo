@@ -41,7 +41,7 @@ const variants: Record<
 };
 
 const typeLabels: Record<Callout["type"], string> = {
-  note: "Nota de Laboratorio",
+  note: "Nota Importante",
   warning: "Advertencia",
   insight: "Observación Clave",
   definition: "Definición",
