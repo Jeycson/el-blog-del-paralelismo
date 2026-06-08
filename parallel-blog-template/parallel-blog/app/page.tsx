@@ -38,8 +38,8 @@ export default function HomePage() {
         <div className="h-px bg-slate-200 mb-16" />
         <SectionHeader
           overline="Casos de Estudio"
-          title="Artículos de Investigación"
-          description={`${ARTICLES.length} estudios documentados que abarcan análisis de SpeedUp, overhead de sincronización, impacto del GIL de CPython y comportamiento de caché bajo distintos patrones de acceso a memoria.`}
+          title="Casos de Estudio Documentados"
+          description={`${ARTICLES.length} casos de estudio documentados que abarcan análisis de SpeedUp, overhead de sincronización, impacto del GIL de CPython y comportamiento de caché bajo distintos patrones de acceso a memoria.`}
           id="articles-heading"
         />
 

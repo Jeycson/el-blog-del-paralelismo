@@ -2,10 +2,10 @@ import { Article, HardwareSpec } from "@/types";
 
 export const PROJECT_META = {
   title: "Computación Paralela & Sistemas Distribuidos",
-  shortTitle: "UnistmoLAB",
+  shortTitle: "Universidad del Istmo - Campus Tehuantepec",
   institution: "Universidad del Istmo",
   faculty: "Ingeniería en Computación",
-  semester: "Primavera 2025",
+  semester: "Ciclo 2025-2026 B",
   mentor: {
     name: "Dr. J. Jesùs Arellano Pimentel",
     role: "Profesor Titular & Mentor de Investigación",
@@ -19,7 +19,7 @@ export const PROJECT_META = {
   ],
   abstract:
     "Este proyecto documenta una serie de experimentos controlados sobre el comportamiento de aplicaciones de cómputo intensivo bajo distintos paradigmas de paralelismo: SIMD, OpenMP, hilos POSIX y CPython. Evaluamos SpeedUp, eficiencia y overhead en entornos de hardware heterogéneo, con el objetivo de establecer métricas reproducibles y recomendaciones prácticas para el diseño de software de alto rendimiento.",
-  githubUrl: "https://github.com/Jeycson/el-blog-del-paralelismo.git",
+  githubUrl: "https://github.com/Jeycson/Analisis_Evaluacion_PPI",
 };
 
 export const HARDWARE_SPECS: HardwareSpec[] = [
