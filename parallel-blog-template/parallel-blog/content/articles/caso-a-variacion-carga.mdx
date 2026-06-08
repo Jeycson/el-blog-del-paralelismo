@@ -348,8 +348,43 @@ De la misma forma, como podemos observar se visualizan en cada tablas los tiempo
   ]}
 />
  
+En los diagramas de cajas y bigotes se puede observar el comportamiento de las distintas configuraciones en Windows, para diferentes tamaños de imágenes. Se observa un patrón particular que tiende a aumentar el tiempo de ejecución cuando el tamaño de la imagen también aumenta.
 
 ## Conclusiones
 
-Los resultados establecen que SIMD AVX2 es el método más eficiente en términos
-de cores utilizados para operaciones de reducción sobre arreglos de punto flotante.
+El comportamiento para cada variación es el mismo. Para todas las hipótesis planteadas se puede decir que fueron aceptadas. 
+
+<ArticleImage 
+  src="/resources/CaseA/OMP (2 hilos).png" 
+  alt="Diagrama de cajas y bigotes — implementación OMP con 2 hilos"
+  caption="Figura 16: Diagrama de cajas y bigotes — implementación OMP con 2 hilos"
+/>
+
+La gráfica anterior, muestra el comportamiento de OpenMP en su versión de 2 hilos, que fue quien obtuvo los tiempos más bajos con las imágenes mediana y grande. En este caso vemos como el tiempo de ejecución incrementa conforme el tamaño de la imagen también lo hace.
+
+<ArticleImage
+  src="/resources/CaseA/Secuencial.png"
+  alt="Diagrama de cajas y bigotes — implementación secuencial (baseline)"
+  caption="Figura 17: Diagrama de cajas y bigotes — implementación secuencial (baseline)"
+/>
+
+Otro caso interesante ocurre en la gráfica del algoritmo secuencial, donde se puede ver claramente que al aumentar el tamaño de la imagen el tiempo de procesamiento se dispara considerablemente, ya que en esta configuración cada píxel extra incrementa la cantidad de trabajo a realizar. 
+Esto concuerda con las 4 hipótesis planteadas por el equipo, por ejemplo en el testimonio de Mariana: 
+>“Tendría sentido que el tiempo de ejecución incremente debido al
+>tamaño de la imagen debido a la cantidad de píxeles a procesar por cada
+>incremento que se le haga a la misma.“
+
+Desde el punto de vista del software y los datos, el tamaño de la imagen dicta directamente el volumen de trabajo.
+
+Complejidad Lineal O(N): El brillo es una operación de píxel a píxel. Si una imagen de 1000 x 1000 tiene 1 millón de píxeles, una de 4000 x 4000 tiene 16 millones. El trabajo no sube de forma lineal con el ancho, sube de forma cuadrática respecto a las dimensiones de la imagen.
+
+Formato BMP y Overhead: El formato BMP no está comprimido. Cada píxel son 3 o 4 bytes (RGB o RGBA). Una imagen de 16 MP en formato de 32 bits (RGBA) pesa unos 64 MB. Mover bloques tan grandes de datos en memoria consume ciclos de reloj que nada tienen que ver con la operación matemática de "sumar brillo".
+
+El procesador puede realizar miles de millones de operaciones por segundo, pero la memoria RAM es drásticamente más lenta.
+
+Cuando procesas una imagen pequeña (ej. 1 MB), toda la imagen cabe en la memoria caché del procesador (L1, L2 o L3). La caché es ultra rápida.
+
+Cuando la imagen es grande (ej. 100 MB), no cabe en la caché. El procesador tiene que ir a buscar los píxeles directamente a la memoria RAM.
+
+El bus de datos de la RAM tiene un "ancho de banda" máximo (ej. 50 GB/s). No importa qué tan rápido sume tu CPU, tiene que sentarse a esperar a que la RAM le entregue los siguientes píxeles. Esto se conoce como Cache Miss (fallo de caché).
+Para romper esta barrera en imágenes gigantescas, la industria no usa más hilos de CPU; traslada el procesamiento a la GPU (tarjeta gráfica) mediante CUDA o OpenCL. Las GPUs tienen miles de núcleos pequeños pero, lo más importante, cuentan con una memoria VRAM con un ancho de banda masivo (a veces más de 1000 GB/s) diseñado específicamente para mover millones de píxeles en paralelo. 
