@@ -162,28 +162,6 @@ export default function HypothesisBlock({
 
   return (
     <section className="my-10 not-prose" aria-labelledby="hypothesis-heading">
-      {/* Section header */}
-      <div className="mb-6">
-
-        {/* Author legend */}
-        <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t border-slate-100">
-          {questions[0]?.entries.map((entry, i) => {
-            const color = getAuthorColor(i)
-            return (
-              <div key={entry.author} className="flex items-center gap-1.5">
-                <div
-                  className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0"
-                  style={{ background: color.bg, color: color.text }}
-                >
-                  {entry.initials}
-                </div>
-                <span className="text-[11px] text-slate-500">{entry.author}</span>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
       {/* Accordion */}
       <div className="flex flex-col gap-2">
         {questions.map((q, i) => (

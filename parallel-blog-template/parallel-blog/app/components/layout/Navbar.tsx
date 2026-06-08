@@ -53,6 +53,12 @@ export default function Navbar() {
           >
             Equipo
           </Link>
+          <Link
+            href="/#hypothesis"
+            className="text-[13px] tracking-wide uppercase font-medium text-slate-500 hover:text-slate-900 transition-colors duration-150"
+          >
+            Hipótesis
+          </Link>
           <a
             href={PROJECT_META.githubUrl}
             target="_blank"
@@ -83,7 +89,7 @@ export default function Navbar() {
       {/* Mobile menu */}
       {menuOpen && (
         <div className="md:hidden bg-white border-t border-slate-100 px-6 py-4 flex flex-col gap-4">
-          {[["/#articles", "Artículos"], ["/#hardware", "Entornos"], ["/#about", "Equipo"]].map(([href, label]) => (
+          {[["/#articles", "Artículos"], ["/#hardware", "Entornos"], ["/#hypothesis", "Hipótesis"]].map(([href, label]) => (
             <Link
               key={href}
               href={href}

@@ -30,6 +30,7 @@ export default function Footer() {
                 ["/#articles", "Artículos de investigación"],
                 ["/#hardware", "Entornos de hardware"],
                 ["/#about", "Equipo de trabajo"],
+                ["/#hypothesis", "Hipótesis de investigación"],
               ].map(([href, label]) => (
                 <li key={href}>
                   <Link
