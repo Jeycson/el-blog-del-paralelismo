@@ -2,6 +2,14 @@ import Link from "next/link";
 import { PROJECT_META } from "@/lib/data";
 
 export default function Footer() {
+
+  const navigationLinks = [
+    { href: "/#articles", label: "Artículos de investigación" },
+    { href: "/#hardware", label: "Entornos de hardware" },
+    { href: "/#about", label: "Equipo de trabajo" },
+    { href: "/#hypothesis", label: "Hipótesis de investigación" },
+  ] as const;
+
   return (
     <footer className="mt-24 border-t border-slate-200 bg-white">
       <div className="max-w-7xl mx-auto px-6 lg:px-10 py-12">
@@ -26,12 +34,7 @@ export default function Footer() {
               Navegación
             </p>
             <ul className="space-y-2">
-              {[
-                ["/#articles", "Artículos de investigación"],
-                ["/#hardware", "Entornos de hardware"],
-                ["/#about", "Equipo de trabajo"],
-                ["/#hypothesis", "Hipótesis de investigación"],
-              ].map(([href, label]) => (
+              {navigationLinks.map(({ href, label }) => (
                 <li key={href}>
                   <Link
                     href={href}
