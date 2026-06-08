@@ -1,0 +1,229 @@
+export const metadata = {
+  toc: [
+    { id: 'introduccion',             title: 'Introducción',              level: 1 },
+    { id: 'metodologia',               title: 'Metodología',               level: 1 },
+    { id: 'configuracion',             title: 'Configuración',             level: 2 },
+    { id: 'procesamiento-de-imagen',   title: 'Procesamiento de Imagen',   level: 2 },
+    { id: 'resultados',                title: 'Resultados',                level: 1 },
+    { id: 'categorizacion-de-tiempos', title: 'Categorización de tiempos', level: 2 }, 
+    { id: 'conclusiones',              title: 'Conclusiones',              level: 1 },
+  ]
+}
+
+<h2 id="introduccion">Introducción</h2>
+
+El análisis de rendimiento en sistemas de cómputo paralelos es fundamental para optimizar algoritmos de procesamiento digital de imágenes. Ante las limitaciones físicas de los procesadores modernos, la evolución del hardware se ha volcado en el desarrollo de arquitecturas multinúcleo. Esto obliga a diseñar software capaz de aprovechar el paralelismo a nivel de hilos (TLP) y el paralelismo a nivel de datos (DLP) mediante unidades vectoriales.
+
+Este reporte evalúa de forma práctica el comportamiento de un algoritmo con una carga de trabajo constante (tamaño de imagen fijo) al incrementar progresivamente la cantidad de hilos concurrentes (2, 4, 8 y 16). El objetivo primordial es resolver **qué va a ocurrir con el *SpeedUp* en cada sistema operativo a medida que se satura el entorno con más hilos**. A través de un análisis comparativo cruzado entre Windows y Linux, se busca identificar el punto de inflexión exacto donde el rendimiento decae debido al *overhead* (sobrecarga) de sincronización y determinar cómo influyen los planificadores de hilos y las restricciones de software en la eficiencia real del sistema.
+
+<h2 id="metodologia">Metodología</h2>
+
+El diseño experimental se fundamenta en un análisis cuantitativo y comparativo bajo un enfoque de **escalamiento fuerte (Strong Scaling)**. En este modelo, la carga de trabajo total se mantiene invariante (tamaño de imagen fijo) mientras se incrementan de forma controlada los recursos de procesamiento físico y lógico en un rango de p = 2, 4, 8, 16 hilos. Este enfoque permite aislar el comportamiento del factor de aceleración (SpeedUp) y evaluar directamente el impacto del incremento de hilos en cada sistema operativo.
+
+Para resolver la hipótesis central y analizar con rigor los límites de escalabilidad, el protocolo experimental recolecta de forma simultánea dos métricas fundamentales por cada tecnología evaluada (Python, OpenMP en C y SIMD en C):
+* **Tiempo de ejecución absoluto (T):** Registrado en milisegundos (ms) para determinar la latencia real de procesamiento.
+* **Factor de aceleración absoluto (SpeedUp):** Calculado de forma estricta al contrastar el mejor tiempo registrado en la ejecución secuencial o base frente al tiempo obtenido en la configuración paralela con p hilos.
+
+A continuación, se detalla el modelo matemático utilizado para el cálculo estricto de la aceleración del sistema:
+
+<figure style={{ textBreak: 'avoid', margin: '1.5rem auto', maxWidth: '50%', textAlign: 'center' }}>
+  <img src="/resources/caseF/SpeedUpFormula.png" alt="Ecuación de SpeedUp Absoluto" style={{ width: '100%', height: 'auto', display: 'block', margin: '0 auto' }} />
+  <figcaption style={{ fontSize: '0.85rem', color: '#666', marginTop: '0.5rem' }}>
+    <strong>Ecuación 1:</strong> Relación matemática para el cálculo de SpeedUp basada en el mejor tiempo secuencial y el peor escenario paralelo.
+  </figcaption>
+</figure>
+
+El análisis comparativo se estructura de forma dual entre dos entornos operativos: **Microsoft Windows 11** (caracterizado por una gestión conservadora de hilos y el freno del GIL) y **Linux** (con un planificador de distribución agresiva sobre los núcleos físicos). Esta segmentación permite evaluar de manera directa cómo la arquitectura del sistema operativo afecta la eficiencia de la paralelización, contrastando la estabilidad de los lenguajes compilados nativos frente a los interpretados y determinando en qué plataforma se mitiga de mejor forma el fenómeno de overhead.
+
+<h3 id="configuracion">Configuración</h3>
+
+Las pruebas se desplegaron sobre una arquitectura de hardware x86_64 dotada de núcleos físicos hiper-entrelazados (Hyper-Threading). El entorno de software y compilación se configuró bajo las siguientes especificaciones:
+
+**Entorno Operativo:** Microsoft Windows 11, operando bajo un esquema de planificación de hilos de prioridad dinámica.
+
+**El codigo base para la ejecucion en C:** Infraestructura principal en C diseñada para la carga de la imagen, inicialización del vector de ajuste de brillo, temporización de los enfoques paralelos y guardado del resultado final.
+```
+#define NUM 2 // 4, 8, 16
+int main(int argc, char** argv)
+{
+    LARGE_INTEGER tinicio, tfin, frec;
+    double mcseg;
+    unsigned char u[16] = { 50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50 };
+	BMP bmp("nature2.bmp");
+    QueryPerformanceFrequency(&frec);
+
+    QueryPerformanceCounter(&tinicio);
+
+    // ENFOQUE 2: Paralelo SIMD
+    procesar_paralelo_simd(bmp, u);
+
+    // ENFOQUE 3: Paralelo con OpenMP
+    procesar_paralelo_omp(bmp);
+
+    QueryPerformanceCounter(&tfin);
+    bmp.save("brightness.bmp");
+    mcseg = (double)(tfin.QuadPart - tinicio.QuadPart) / frec.QuadPart;
+    printf("Tiempo transcurrido: %lf ms\n", mcseg * 1000);
+
+    return 0;
+}
+```
+
+**Implementación OpenMP (C):** Código fuente nativo con soporte para multiprocesamiento de memoria compartida (TLP). Distribuye los fragmentos del bucle de forma equitativa mediante una directiva estática y sincroniza los hilos a través de una barrera implícita al finalizar la región paralela.
+```
+void procesar_paralelo_omp(BMP& bmp) {
+    BYTE* data = bmp.getImageData();
+    int size = bmp.getImageSize();
+
+#pragma omp parallel for schedule(static) num_threads(NUM)
+    for (int i = 0; i < size; i++) {
+        int temp = data[i] + 50;
+        if (temp > 255) data[i] = 255;
+        else if (temp < 0) data[i] = 0;
+        else data[i] = (BYTE)temp;
+    }
+}
+```
+
+**Implementación SIMD (C):** Enfoque híbrido que combina paralelismo a nivel de hilos (TLP) y de datos (DLP). Segmenta el buffer de la imagen en fragmentos proporcionales al número de hilos definidos (NUM) mediante la API nativa de Windows (CreateThread). Cada hilo invoca una rutina secundaria encargada de ejecutar instrucciones intrínsecas vectoriales para procesar múltiples píxeles por ciclo de reloj utilizando un arreglo de control (u).
+```
+void procesar_paralelo_simd(BMP& bmp, unsigned char u[16]) {
+    HANDLE hThread[NUM] = { NULL };
+    LPDWORD deTheradId = { NULL };
+    STDATOS datos[NUM];
+
+    for (int i = 0; i < NUM; i++)
+    {
+        datos[i].gimg = bmp.getImageData() + (sizeof(BYTE) * (bmp.getImageSize() / NUM) * i);
+        datos[i].size = bmp.getImageSize() / NUM;
+        memcpy(datos[i].u, u, 16);
+        hThread[i] = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)hilo, &datos[i], 0, deTheradId);
+
+        if (hThread[i] == NULL) {
+            printf("Error al crear el hilo %d\n", i);
+            return;
+        }
+    }
+
+    for (int i = 0; i < NUM; i++)
+    {
+        WaitForSingleObject(hThread[i], INFINITE);
+        CloseHandle(hThread[i]);
+    }
+}
+```
+
+**Implementación Python:** Entorno de ejecución interpretado bajo CPython. A pesar de la concurrencia basada en la biblioteca threading para dividir la carga de filas de la imagen, el paralelismo real a nivel de hilos de CPU se ve restringido por el Mecanismo de Exclusión Mutua (GIL, Global Interpreter Lock).
+```
+img = cv2.imread(ruta_imagen)
+    if img is None:
+        return None
+        
+    alto, ancho, _ = img.shape
+    vector_brillo = np.array([factor_brillo, factor_brillo, factor_brillo], dtype=np.uint8)
+    img_brillo = np.zeros_like(img)
+    
+    # Creación y lanzamiento de hilos
+    filas_por_hilo = alto // num_hilos
+    lista_hilos = []
+    
+    for j in range(num_hilos):
+        inicio_fila = j * filas_por_hilo
+        fin_fila = alto if (j == num_hilos - 1) else (j + 1) * filas_por_hilo
+        
+        hilo = threading.Thread(
+            target=procesar_bloque_brillo,
+            args=(img, inicio_fila, fin_fila, vector_brillo, img_brillo)
+        )
+        lista_hilos.append(hilo)
+        hilo.start()
+        
+    # Sincronización
+    for hilo in lista_hilos:
+        hilo.join()
+
+    t_fin = time.perf_counter()
+    return (t_fin - t_inicio) * 1000
+```
+<CalloutBlock
+  type="warning"
+  title="Impacto del Context Switch y el GIL"
+  content="A medida que el número de hilos excede la cantidad de núcleos físicos disponibles en el hardware, el planificador del sistema operativo se ve forzado a realizar un sobre-muestreo de cambios de contexto (Context Switching). En el caso de Python, este fenómeno se ve agravado por la serialización forzosa del GIL, lo que transforma el paralelismo real en un esquema de concurrencia competitiva por el núcleo."
+/>
+
+<h3 id="procesamiento-de-imagen">Procesamiento de Imagen</h3>
+
+Para evaluar la eficiencia del paralelismo en cada tecnología, se seleccionó como carga de trabajo un algoritmo de **modificación de brillo** sobre un arreglo unidimensional de píxeles (formato RGB/RGBA). Esta operación de procesamiento punto a punto consiste en aplicar una transformación lineal simétrica a cada canal de color.
+
+A continuación, se presenta el recurso visual utilizado como matriz base para las pruebas de cómputo intensivo:
+
+<figure style={{ textBreak: 'avoid', margin: '2rem auto', maxWidth: '60%', textAlign: 'center' }}>
+  <img src="/nature2.png" alt="Imagen base para procesamiento de brillo" style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '8px' }} />
+  <figcaption style={{ fontSize: '0.85rem', color: '#666', marginTop: '0.75rem' }}>
+    <strong>Figura 1:</strong> Imagen de prueba utilizada para evaluar el algoritmo de ajuste de brillo en los entornos paralelos y vectoriales. Tamaño (1240x930)
+  </figcaption>
+</figure>
+
+<h2 id="resultados">Resultados</h2>
+
+<h3 id="categorizacion-de-tiempos">Categorización de tiempos</h3>
+
+En las siguientes tablas se expone el desglose detallado del rendimiento absoluto y relativo del sistema bajo Windows y Linux. Esta estructura facilita el contraste directo de cómo afecta la asignación de más hilos al factor de aceleración (*SpeedUp*) bajo una carga de trabajo constante.
+
+<h4>Tabla 1. Rendimiento y SpeedUp en Entorno Windows</h4>
+
+<AcademicTable
+  tableNumber={1}
+  data={{
+    caption: "Métricas de tiempo promedio (ms) y factor de aceleración (SpeedUp) en Windows para el Caso F: Variación de hilos con tamaño de imagen constante.",
+    headers: ["Hilos", "Python Tiempo (ms)", "Python SpeedUp", "OpenMP Tiempo (ms)", "OpenMP SpeedUp", "SIMD Tiempo (ms)", "SIMD SpeedUp"],
+    rows: [
+      ["2",  "8.733832",  "1.00", "5.250103", "1.00", "4.488143", "1.00"],
+      ["4",  "8.563499",  "1.02", "4.890403", "1.07", "4.866315", "0.92"],
+      ["8",  "10.195321", "0.86", "5.334677", "0.98", "5.308855", "0.85"],
+      ["16", "10.742000", "0.81", "5.848451", "0.90", "5.447170", "0.82"],
+    ],
+    highlightCol: 4,
+  }}
+/>
+
+<h4>Tabla 2. Rendimiento y SpeedUp en Entorno Linux</h4>
+
+<AcademicTable
+  tableNumber={2}
+  data={{
+    caption: "Métricas de tiempo promedio (ms) y factor de aceleración (SpeedUp) en Linux para el Caso F: Variación de hilos con tamaño de imagen constante.",
+    headers: ["Hilos", "Python Tiempo (ms)", "Python SpeedUp", "OpenMP Tiempo (ms)", "OpenMP SpeedUp", "SIMD Tiempo (ms)", "SIMD SpeedUp"],
+    rows: [
+      ["2",  "52.647967", "1.00", "0.252325", "1.00", "0.686615", "1.00"],
+      ["4",  "31.644412", "1.66", "0.262512", "0.96", "0.529005", "1.30"],
+      ["8",  "43.166883", "1.22", "0.891400", "0.68", "0.596675", "1.15"],
+      ["16", "49.131483", "1.07", "0.411723", "0.61", "0.591640", "1.16"],
+    ],
+    highlightCol: 2,
+  }}
+/>
+
+<ChartContainer
+  figureNumber={2}
+  caption="Distribución e inflexión del factor de aceleración relativo y tiempos de ejecución absoluto bajo Windows y Linux. Se evidencia visualmente el impacto del overhead de hilos."
+>
+  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', margin: '1rem 0' }}>
+    <img src="/resources/CaseF/grafica_speedup_Windows.png" alt="SpeedUp en Windows" style={{ width: '100%', height: 'auto', borderRadius: '4px' }} />
+    <img src="/resources/CaseF/grafica_tiempos_Windows.png" alt="Tiempos de ejecución en Windows" style={{ width: '100%', height: 'auto', borderRadius: '4px' }} />
+    <img src="/resources/CaseF/grafica_speedup_Linux.png" alt="SpeedUp en Linux" style={{ width: '100%', height: 'auto', borderRadius: '4px' }} />
+    <img src="/resources/CaseF/grafica_tiempos_Linux.png" alt="Tiempos de ejecución en Linux" style={{ width: '100%', height: 'auto', borderRadius: '4px' }} />
+  </div>
+</ChartContainer>
+
+Asimismo, en los gráficos de la **Figura 2** se puede observar que los datos permiten contrastar de forma directa cómo la asignación de hilos afecta de manera desigual a cada sistema operativo. El dato analítico más destacado revela que **Python en Linux reportó el SpeedUp relativo más alto de todo el experimento (1.66 con 4 hilos)**, superando porcentualmente a las tecnologías nativas en C.
+
+Sin embargo, este comportamiento representa un **"falso espejismo"** de rendimiento: dado que su código base con 2 hilos en Linux era extremadamente lento e ineficiente (52.64 ms), al asignarle 4 hilos el kernel redujo ese tiempo a 31.64 ms, disparando matemáticamente la aceleración relativa. En tiempos absolutos de ejecución, Python sigue siendo la tecnología más rezagada por una diferencia abismal frente a las versiones en C (OpenMP y SIMD), las cuales mantuvieron registros siempre inferiores a un solo milisegundo en Linux, a pesar de sufrir caídas en su SpeedUp por saturación.
+
+<h2 id="conclusiones">Conclusiones</h2>
+
+Con base en el análisis teórico y los datos empíricos recolectados, se valida que las hipótesis planteadas por Jairo y Mariana predijeron con total precisión el comportamiento real del experimento, seguidas de cerca por las observaciones de Jeovani y Jeycson respecto al estancamiento del sistema. El fenómeno físico quedó demostrado bajo el argumento de Jairo: al mantener un tamaño de imagen fijo y reducido, la porción de carga de trabajo asignada a cada hilo se vuelve insignificante. Esto provoca que el sistema operativo invierta más tiempo y recursos en la creación, administración y alternancia de los hilos (fase de overhead) que en el procesamiento real de los píxeles, validando las curvas descendentes anticipadas por Mariana bajo la premisa de que un exceso de hilos degrada la eficiencia.
+
+El hallazgo analítico más destacable del estudio radica en el comportamiento de Python bajo el entorno Linux, el cual reportó el factor de aceleración relativo más alto de todo el experimento (un SpeedUp de 1.66 utilizando 4 hilos), superando porcentualmente a las soluciones nativas en C (OpenMP y SIMD). Sin embargo, este fenómeno se cataloga estrictamente como un **"falso espejismo"** de rendimiento. Al evaluar los tiempos absolutos, la configuración base de Python con 2 hilos en Linux demostró una profunda ineficiencia latente (52.64 ms); por lo tanto, la reducción del tiempo a 31.64 ms al implementar 4 hilos disparó de forma matemática el cálculo de aceleración respecto a su propio estado inicial. En términos absolutos de ejecución, Python permanece como la tecnología más rezagada por una diferencia abismal frente a las implementaciones en C, las cuales mantuvieron registros siempre inferiores a un solo milisegundo a pesar de sufrir caídas críticas en sus curvas de SpeedUp.
+
+En conclusión, bajo un esquema de escalamiento fuerte con una carga de trabajo pequeña e invariable, el SpeedUp alcanzará un punto de inflexión óptimo muy temprano (fijado en 4 hilos para la mayoría de entornos) y decaerá drásticamente al saturar la arquitectura con 8 y 16 hilos. Los resultados demuestran que el planificador de procesos de Linux gestiona la distribución de hilos de forma más agresiva y eficiente sobre los núcleos físicos en comparación con la política conservadora y la contención del GIL observadas en Windows 11. No obstante, la sobrecarga por hilos termina afectando a ambos sistemas operativos por igual, empujando los coeficientes de OpenMP y SIMD por debajo de la barrera de la eficiencia elemental, lo que demuestra que la fragmentación excesiva de un problema pequeño no justifica el uso de paralelismo multifilamento masivo.
