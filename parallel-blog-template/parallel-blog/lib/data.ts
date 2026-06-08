@@ -177,7 +177,7 @@ export const ARTICLES: Article[] = [
     tags: ["Cache", "perf", "Cachegrind", "BLAS", "Localidad"],
     authors: [
       {
-        name: "Jeycson Gabriel López Hernández",
+        name: "Jairo ",
         role: "Estudiante de Ing. Computación",
         institution: "Unistmo",
       },
@@ -187,6 +187,24 @@ export const ARTICLES: Article[] = [
     abstract:
       "Utilizamos perf stat y Cachegrind para perfilar la tasa de L1/L2/L3 cache misses en implementaciones naive vs. optimizadas de multiplicación de matrices. El tiling por bloques reduce las faltas de L3 hasta un 87%.",
     hardware: ["env-a", "env-c"],
+  },
+  {
+    slug: "caso-e-speedup-so-variacion-carga",
+    title: "Caso E: Variación de tamaño de la imagen con el mismo número de hilos en Windows y Linux",
+    subtitle: "Evaluación del SpeedUp relativo entre Windows 11 y Linux al variar el tamaño de la imagen con un mismo esquema de paralelismo.",
+    category: "Comparación de Sistemas Operativos",
+    tags: ["Windows 11", "Ubuntu Linux", "SpeedUp", "OpenMP", "SIMD", "Python"],
+    authors: [
+      {
+        name: "Jeycson Gabriel López Hernández",
+        role: "Estudiante Ing. Computación",
+        institution: "Unistmo",
+      },
+    ],
+    date: "2026-06-07",
+    readingTime: 30,
+    abstract: "Este reporte ...",
+    hardware: ["env-c", "env-d"], 
   },
   {
     slug: "caso-f-speedup-sistemas-operativos",
@@ -205,5 +223,5 @@ export const ARTICLES: Article[] = [
     readingTime: 12,
     abstract: "Este reporte evalúa el impacto crítico del planificador de procesos en Windows 11 frente a Linux al incrementar la densidad de hilos (de 2 a 16) bajo una carga de trabajo constante. Los resultados demuestran de forma empírica que mantener un tamaño de imagen fijo e intensivo induce pérdidas severas de eficiencia por overhead de sincronización a partir de los 4 hilos. Asimismo, se evidencia un falso espejismo de escalabilidad en entornos interpretados, donde Python bajo Linux registra un SpeedUp relativo de 1.66 debido a la profunda ineficiencia de su estado base , mientras que las implementaciones nativas en C (OpenMP y SIMD) mantienen el rendimiento absoluto óptimo por debajo del milisegundo.",
     hardware: ["env-a", "env-b"], 
-  }
+  },
 ];
