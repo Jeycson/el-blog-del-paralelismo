@@ -278,10 +278,15 @@ la imagen muy grande es la implementación en OpenMP con 8 hilos.
       title: "Secuencial",
       images: [
         {
-          src: "/resources/CaseA/Secuencial.png",
-          alt: "Diagrama de cajas y bigotes — implementación secuencial (baseline)",
-          label: "Baseline",
+          src: "/resources/CaseE/Secuencial Linux.png",
+          alt: "Diagrama de cajas y bigotes — implementación secuencial (Linux)",
+          label: "Configuración Linux",
         },
+        {
+            src: "/resources/CaseE/Secuencial Windows.png",
+            alt: "Diagrama de cajas y bigotes — implementación secuencial (Windows)",
+            label: "Configuración Windows",
+        }
       ],
     },
     {
@@ -289,29 +294,14 @@ la imagen muy grande es la implementación en OpenMP con 8 hilos.
       title: "SIMD",
       images: [
         {
-          src: "/resources/CaseA/SIMD (sin hilos).png",
-          alt: "Box plot SIMD sin hilos",
-          label: "Sin hilos",
-        },
-        {
-          src: "/resources/CaseA/SIMD (2 hilos).png",
-          alt: "Box plot SIMD con 2 hilos",
-          label: "2 hilos",
-        },
-        {
-          src: "/resources/CaseA/SIMD (4 hilos).png",
-          alt: "Box plot SIMD con 4 hilos",
-          label: "4 hilos",
-        },
-        {
-          src: "/resources/CaseA/SIMD (8 hilos).png",
+          src: "/resources/CaseE/SIMD (8 hilos) Linux.png",
           alt: "Box plot SIMD con 8 hilos",
-          label: "8 hilos",
+          label: "8 hilos en Linux",
         },
         {
-          src: "/resources/CaseA/SIMD (16 hilos).png",
-          alt: "Box plot SIMD con 16 hilos",
-          label: "16 hilos",
+          src: "/resources/CaseE/SIMD (8 hilos) Windows.png",
+          alt: "Box plot SIMD con 8 hilos",
+          label: "8 hilos en Windows",
         },
       ],
     },
@@ -320,24 +310,14 @@ la imagen muy grande es la implementación en OpenMP con 8 hilos.
       title: "OMP",
       images: [
         {
-          src: "/resources/CaseA/OMP (2 hilos).png",
-          alt: "Box plot OpenMP con 2 hilos",
-          label: "2 hilos",
-        },
-        {
-          src: "/resources/CaseA/OMP (4 hilos).png",
-          alt: "Box plot OpenMP con 4 hilos",
-          label: "4 hilos",
-        },
-        {
-          src: "/resources/CaseA/OMP (8 hilos).png",
+          src: "/resources/CaseE/OMP (8 hilos) Linux.png",
           alt: "Box plot OpenMP con 8 hilos",
-          label: "8 hilos",
+          label: "8 hilos en Linux",
         },
         {
-          src: "/resources/CaseA/OMP (16 hilos).png",
-          alt: "Box plot OpenMP con 16 hilos",
-          label: "16 hilos",
+          src: "/resources/CaseE/OMP (8 hilos) Windows.png",
+          alt: "Box plot OpenMP con 8 hilos",
+          label: "8 hilos en Windows",
         },
       ],
     },
@@ -346,72 +326,138 @@ la imagen muy grande es la implementación en OpenMP con 8 hilos.
       title: "Python",
       images: [
         {
-          src: "/resources/CaseA/IA Python (1 hilo).png",
-          alt: "Box plot Python con 1 hilo",
-          label: "1 hilo",
-        },
-        {
-          src: "/resources/CaseA/IA Python (2 hilos).png",
-          alt: "Box plot Python con 2 hilos",
-          label: "2 hilos",
-        },
-        {
-          src: "/resources/CaseA/IA Python (4 hilos).png",
-          alt: "Box plot Python con 4 hilos",
-          label: "4 hilos",
-        },
-        {
-          src: "/resources/CaseA/IA Python (8 hilos).png",
+          src: "/resources/CaseE/Python (8 hilos) Linux.png",
           alt: "Box plot Python con 8 hilos",
-          label: "8 hilos",
+          label: "8 hilos en Linux",
         },
         {
-          src: "/resources/CaseA/IA Python (16 hilos).png",
-          alt: "Box plot Python con 16 hilos",
-          label: "16 hilos",
-        },
+          src: "/resources/CaseE/IA Python (8 hilos) Windows.png",
+          alt: "Box plot Python con 8 hilos",
+          label: "8 hilos en Windows",
+        }
       ],
     },
   ]}
 />
  
-En los diagramas de cajas y bigotes se puede observar el comportamiento de las distintas configuraciones en Windows, para diferentes tamaños de imágenes. Se observa un patrón particular que tiende a aumentar el tiempo de ejecución cuando el tamaño de la imagen también aumenta.
+En los diagramas de cajas y bigotes anteriores se puede observar la distribución de los tiempos de 
+ejecución para cada configuración. Se puede notar que en general, a medida que el tamaño de la 
+imagen aumenta, el tiempo de ejecución también lo hace, lo cual es consistente con algunas hipótesis 
+planteadas por el equipo.
+
+<ArticleImage 
+  src="/resources/CaseE/Comparación Speedup Linux.svg" 
+  alt="Diagrama barras comparativo de los Speedup de Linux"
+  caption="Figura 9: Diagrama barras comparativo de los Speedup de Linux"
+/>
+
+En la gráfica podemos apreciar el comportamiento de los Speedup en cada una de las configuraciones 
+implementadas con 8 hilos en Linux, donde se puede observar una tendencia del Speedup registrado por 
+aumentar de la misma forma en que aumenta el tamaño de la imagen.
+
+<ArticleImage 
+  src="/resources/CaseE/Comparación Speedup Windows.svg" 
+  alt="Diagrama barras comparativo de los Speedup de Windows"
+  caption="Figura 10: Diagrama barras comparativo de los Speedup de Windows"
+/>
+
+En el caso de Windows vemos un comportamiento de los speedup más equilibrado, en cuanto a lo que se 
+observa el speedup no cambia casi nada en la configuración SIMD, ni en la configuración de Python. 
+Donde se observa mayor crecimiento es en la implementación en OpenMP.
+
+Finalmente entre los dos sistemas se puede ver la tendencia que tiene el Speedup a crecer conforme igual 
+el tamaño de la imagen lo hace.
+
+<AcademicTable
+  tableNumber={7}
+  data={{
+    caption: "Speedups reportados para cada implementación en Linux",
+    headers: ["Implementación", "Imagen mediana", "Imagen grande", "Imagen muy grande"],
+    rows: [
+      ["SIMD (8 hilos)", "15.97469053",	"35.10729586",	"37.22880716"],
+      ["OMP (8 hilos)", "1.080713283",	"5.620239645",	"5.072206576"],
+      ["Python (8 hilos)", "2.213436873",	"9.898653038",	"15.02317983"]
+    ],
+    highlightCol: 0,
+  }}
+/>
+
+<AcademicTable
+  tableNumber={8}
+  data={{
+    caption: "Speedups reportados para cada implementación en Windows",
+    headers: ["Implementación", "Imagen mediana", "Imagen grande", "Imagen muy grande"],
+    rows: [
+      ["SIMD (8 hilos)", "31.40123919",	"31.50378203",	"39.04784191"],
+      ["OMP (8 hilos)", "20.7485803",	"27.66203337",	"43.52711234"],
+      ["Python (8 hilos)", "8.62036186",	"9.470782668",	"12.6213373"]
+    ],
+    highlightCol: 0,
+  }}
+/>
 
 ## Conclusiones
 
-El comportamiento para cada variación es el mismo. Para todas las hipótesis planteadas se puede decir que fueron aceptadas. 
+La hipótesis que mejor concuerda con el comportamiento observado es la de Jairo:
+>“Considero que el Speedup va a ser mejor y más alto con las imágenes
+>más grandes. Cuando la imagen es pequeñita, la computadora tarda casi lo mismo
+>en crear y organizar los hilos que en procesar la imagen. Pero cuando la imagen es
+>más grande, el trabajo es tanto que la ventaja de repartir la tarea entre varios hilos
+>se va a notar muchísimo más.”
+En esta hipótesis justo se remarca el incremento del Speedup conforme se incrementa el tamaño de la imagen. 
 
-<ArticleImage 
-  src="/resources/CaseA/OMP (2 hilos).png" 
-  alt="Diagrama de cajas y bigotes — implementación OMP con 2 hilos"
-  caption="Figura 16: Diagrama de cajas y bigotes — implementación OMP con 2 hilos"
-/>
+Otro caso curioso es la hipótesis de Jeycson:
+>“Mi idea es que al aumentar el número de hilos en linux e incrementar
+>el tamaño de las imágenes van a tener mejores Speedup que en windows. Pero de
+>por si a medida que aumentemos los hilos pues se aligera la carga de trabajo y se
+>reducen los tiempos de ejecución en ambos sistemas, aunque en linux tal vez
+>veamos Speedups mayores de 20x a comparación de windows que podremos ver, si
+>bien le va de 10x.“
 
-La gráfica anterior, muestra el comportamiento de OpenMP en su versión de 2 hilos, que fue quien obtuvo los tiempos más bajos con las imágenes mediana y grande. En este caso vemos como el tiempo de ejecución incrementa conforme el tamaño de la imagen también lo hace.
+Ya que como se puede observar en la tabla 7 y 8, los speedup contradicen lo que se menciona en la hipótesis, ya que 
+prácticamente ocurre lo contrario reportando Speedup mayores a 20x en su mayoría en el sistema operativo Windows 
+y no en Linux como se pensaba.
 
-<ArticleImage
-  src="/resources/CaseA/Secuencial.png"
-  alt="Diagrama de cajas y bigotes — implementación secuencial (baseline)"
-  caption="Figura 17: Diagrama de cajas y bigotes — implementación secuencial (baseline)"
-/>
+Se consultó con una IA el origen del fenómeno que estamos observando, este fue el prompt ingresado a Gemini Flash 3.5: 
 
-Otro caso interesante ocurre en la gráfica del algoritmo secuencial, donde se puede ver claramente que al aumentar el tamaño de la imagen el tiempo de procesamiento se dispara considerablemente, ya que en esta configuración cada píxel extra incrementa la cantidad de trabajo a realizar. 
-Esto concuerda con las 4 hipótesis planteadas por el equipo, por ejemplo en el testimonio de Mariana: 
->“Tendría sentido que el tiempo de ejecución incremente debido al
->tamaño de la imagen debido a la cantidad de píxeles a procesar por cada
->incremento que se le haga a la misma.“
+“Cuales son las causas fisicas y logicas de que si mantenemos una misma configuracion de 8 hilos en cada algoritmo (SIMD con instrucciones XMM, OPM, Python) pero incrementamos el tamaño de la imagen en cada una, los speedup igual crecen conforme se incrementa el tamaño de la imagen, y esto se nota mas en windows que en linux. que podría explicar que en linux casi no hubo variaciones entre los speedup de las imágenes medianas y grandes.”
 
-Desde el punto de vista del software y los datos, el tamaño de la imagen dicta directamente el volumen de trabajo.
+Y la explicación que nos dio es la siguiente:
 
-Complejidad Lineal O(N): El brillo es una operación de píxel a píxel. Si una imagen de 1000 x 1000 tiene 1 millón de píxeles, una de 4000 x 4000 tiene 16 millones. El trabajo no sube de forma lineal con el ancho, sube de forma cuadrática respecto a las dimensiones de la imagen.
+**1. ¿Por qué el speedup crece conforme aumenta el tamaño de la imagen?**
 
-Formato BMP y Overhead: El formato BMP no está comprimido. Cada píxel son 3 o 4 bytes (RGB o RGBA). Una imagen de 16 MP en formato de 32 bits (RGBA) pesa unos 64 MB. Mover bloques tan grandes de datos en memoria consume ciclos de reloj que nada tienen que ver con la operación matemática de "sumar brillo".
+Podría parecer contradictorio que si la memoria RAM es el cuello de botella (como vimos antes), el speedup mejore en imágenes más grandes. Sin embargo, esto ocurre por dos razones principales:
 
-El procesador puede realizar miles de millones de operaciones por segundo, pero la memoria RAM es drásticamente más lenta.
+A. La Amortización del Overhead (Lógica y Software)
 
-Cuando procesas una imagen pequeña (ej. 1 MB), toda la imagen cabe en la memoria caché del procesador (L1, L2 o L3). La caché es ultra rápida.
+Lanzar hilos, sincronizarlos y destruirlos no es gratis; le cuesta ciclos de reloj al procesador.
+En imágenes pequeñas o medianas: El tiempo que se tarda el algoritmo en procesar los píxeles es tan corto que el tiempo que gastó el sistema operativo en "crear y preparar" los 8 hilos representa una porción muy grande del tiempo total de ejecución. El speedup se ve penalizado por este costo fijo.
+En imágenes grandes: El trabajo puramente matemático y de memoria (O(N)) crece masivamente. El costo de crear los hilos sigue siendo el mismo (es fijo), pero ahora representa una fracción insignificante (menos del 1%) del tiempo total. Al diluirse este costo, el algoritmo finalmente demuestra su verdadero potencial de aceleración paralela (esto se alinea con la Ley de Gustafson).
 
-Cuando la imagen es grande (ej. 100 MB), no cabe en la caché. El procesador tiene que ir a buscar los píxeles directamente a la memoria RAM.
+B. Paralelismo a Nivel de Memoria o Memory-Level Parallelism (MLP) (Física y Hardware)
 
-El bus de datos de la RAM tiene un "ancho de banda" máximo (ej. 50 GB/s). No importa qué tan rápido sume tu CPU, tiene que sentarse a esperar a que la RAM le entregue los siguientes píxeles. Esto se conoce como Cache Miss (fallo de caché).
-Para romper esta barrera en imágenes gigantescas, la industria no usa más hilos de CPU; traslada el procesamiento a la GPU (tarjeta gráfica) mediante CUDA o OpenCL. Las GPUs tienen miles de núcleos pequeños pero, lo más importante, cuentan con una memoria VRAM con un ancho de banda masivo (a veces más de 1000 GB/s) diseñado específicamente para mover millones de píxeles en paralelo. 
+Aquí hay un secreto de los procesadores modernos: un solo núcleo de CPU no es capaz de saturar por sí solo todo el ancho de banda de la memoria RAM.
+Un solo núcleo tiene un límite físico de peticiones de memoria pendientes que puede hacer a la vez (determinado por unos buffers internos llamados Line Fill Buffers). Mientras espera que la RAM le devuelva los datos, ese núcleo se queda "pausado" por la latencia.
+Cuando introduces 8 hilos corriendo en 8 núcleos distintos, cada núcleo genera sus propias peticiones en paralelo. Colectivamente, los 8 hilos logran "llenar el tubo" del bus de datos de la RAM mucho mejor de lo que podría un solo hilo. Por lo tanto, en imágenes gigantes que dependen enteramente de la RAM, el algoritmo secuencial se vuelve extremadamente lento (sufre por la latencia de memoria de forma lineal), mientras que el algoritmo de$8 hilos exprime los canales de la memoria al máximo, haciendo que la diferencia de tiempo (speedup) entre 1 hilo y 8 hilos sea mucho más alta a favor del código paralelo.
+
+**2. ¿Por qué en Windows el incremento de speedup es tan drástico y en Linux casi no varía entre imágenes medianas y grandes?**
+
+La razón de que Linux mantenga un speedup casi plano (estable) desde imágenes medianas, mientras que Windows necesita imágenes gigantes para alcanzar su mejor speedup, se debe puramente a la arquitectura interna de cada Sistema Operativo.
+
+A. La Razón Reina: El costo de creación de Hilos y Procesos
+
+En Python (Multiprocessing): Si para evadir el GIL (Global Interpreter Lock) de Python utilizaste multiprocesamiento, la diferencia es abismal.
+Windows utiliza el método spawn. Para crear un nuevo proceso, Windows tiene que arrancar un intérprete de Python completamente nuevo desde cero, volver a importar las librerías y duplicar el estado. ¡Esto es increíblemente lento y pesado! En imágenes medianas, este costo destruye el speedup. Solo cuando la imagen es gigante el trabajo es tan masivo que supera la enorme penalización del spawn.
+Linux utiliza fork(). Crear un proceso en Linux es casi instantáneo porque clona el proceso padre directamente en memoria usando una técnica ultra eficiente llamada Copy-on-Write (copia en escritura). Como el costo de inicio en Linux es casi cero, el speedup máximo se alcanza de inmediato desde imágenes medianas.
+En C/C++ (OpenMP y SIMD XMM): Aunque OpenMP usa hilos (pthreads en Linux y Win32 Threads en Windows) y no procesos, la ventaja sigue siendo de Linux. La llamada al sistema en Linux para crear hilos (clone) está sumamente optimizada a nivel de Kernel y es extremadamente ligera. Windows (CreateThread) maneja estructuras de seguridad, registros de subsistemas y un contexto de hilo mucho más pesado, lo que añade más milisegundos de sobrecarga inicial.
+
+B. El Planificador de Tareas (Scheduler)
+
+El planificador de Linux (históricamente CFS y ahora EEVDF) está diseñado para cargas de trabajo de alta computación (High-Performance Computing). Distribuye los 8 hilos de manera inmediata y agresiva en los núcleos físicos disponibles y mantiene una alta "afinidad de caché", evitando mover los hilos de un núcleo a otro a menos que sea estrictamente necesario.
+Windows, al ser un sistema operativo enfocado en el entorno de escritorio y la experiencia de usuario, prioriza la responsividad de la interfaz. Su planificador suele mover los hilos de núcleo con mayor frecuencia (thread migration) para equilibrar la temperatura o responder a otros procesos en segundo plano. En imágenes medianas (donde el procesamiento dura fracciones de segundo), estas interrupciones de Windows degradan el speedup. En imágenes grandes, el hilo pasa tanto tiempo calculando que el planificador de Windows finalmente se estabiliza.
+
+C. Gestión de Memoria y Fallos de Página (Page Faults)
+
+Al procesar una imagen grande en paralelo, ambos sistemas operativos tienen que asignar memoria física real a los bloques virtuales del programa a medida que los hilos empiezan a escribir en ellos (esto genera eventos llamados Page Faults).
+El gestor de memoria de Linux maneja los fallos de página en paralelo de forma muy eficiente gracias a bloqueos de memoria altamente granulares.
+El gestor de memoria de Windows (especialmente al interactuar con el Working Set de los procesos) suele introducir más sincronización global a nivel de Kernel cuando muchos hilos solicitan páginas físicas al mismo tiempo de manera masiva, provocando un cuello de botella de software interno que solo se mitiga cuando los hilos terminan de pedir memoria y se dedican puramente a computar en imágenes de gran escala.
