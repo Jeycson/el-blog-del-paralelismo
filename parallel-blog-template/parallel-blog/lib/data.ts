@@ -48,7 +48,7 @@ export const HARDWARE_SPECS: HardwareSpec[] = [
     cacheL2: "1.25 MB × 4 núcleos",
     cacheL3: "8.0 MB compartida",
     ram: "20 GB DDR4-3200",
-    os: "Fedora Workstation 34, GNOME Version 40, Kernel Version Linux 5.11.12-300, Nativo",
+    os: "Fedora Workstation 42, GNOME Version 48, Kernel Version Linux 6.14.6-300.fc42.x86_64, Nativo",
     notes: "Hyperthreading habilitado durante todas las pruebas. Ejecución nativa.",
   },
   {
@@ -203,7 +203,7 @@ export const ARTICLES: Article[] = [
     ],
     date: "2026-06-07",
     readingTime: 12,
-    abstract: "Analizamos el impacto crítico del diseño del kernel y el planificador de procesos (Scheduler) en Windows 11 vs. Ubuntu Linux 24.04. Los resultados exponen cómo cargas ligeras de tamaño fijo inducen pérdidas severas de eficiencia por overhead de hilos, revelando falsos espejismos de escalabilidad en entornos interpretados.",
+    abstract: "Este reporte evalúa el impacto crítico del planificador de procesos en Windows 11 frente a Linux al incrementar la densidad de hilos (de 2 a 16) bajo una carga de trabajo constante. Los resultados demuestran de forma empírica que mantener un tamaño de imagen fijo e intensivo induce pérdidas severas de eficiencia por overhead de sincronización a partir de los 4 hilos. Asimismo, se evidencia un falso espejismo de escalabilidad en entornos interpretados, donde Python bajo Linux registra un SpeedUp relativo de 1.66 debido a la profunda ineficiencia de su estado base , mientras que las implementaciones nativas en C (OpenMP y SIMD) mantienen el rendimiento absoluto óptimo por debajo del milisegundo.",
     hardware: ["env-a", "env-b"], 
   }
 ];
