@@ -23,6 +23,7 @@
   "devDependencies": {
     "@types/mdx": "^2.0.14",
     "@types/node": "^20",
+    "@types/prop-types": "^15.7.15",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.4.19",

@@ -17,6 +17,7 @@ const withMDX = createMDX({
 const nextConfig = {
   pageExtensions: ['ts', 'tsx', 'mdx'],
   experimental: { typedRoutes: true },
+  output: 'export',
 }
 
 export default withMDX(nextConfig)
