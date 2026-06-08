@@ -60,7 +60,7 @@ export default async function ArticlePage({ params }: PageProps) {
         <nav aria-label="Breadcrumb" className="flex items-center gap-2 mb-6 text-[12px] text-slate-400">
           <a href="/" className="hover:text-slate-700 transition-colors">Inicio</a>
           <span aria-hidden="true">›</span>
-          <a href="/#articles" className="hover:text-slate-700 transition-colors">Artículos</a>
+          <a href="/#articles" className="hover:text-slate-700 transition-colors">Casos de estudio</a>
           <span aria-hidden="true">›</span>
           <span className="text-slate-600 font-medium truncate max-w-[200px]">{article.title}</span>
         </nav>

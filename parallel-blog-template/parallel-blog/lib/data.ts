@@ -203,7 +203,7 @@ export const ARTICLES: Article[] = [
     ],
     date: "2026-06-07",
     readingTime: 30,
-    abstract: "Este reporte ...",
+    abstract: "Este caso de estudio presenta un análisis comparativo del rendimiento y la escalabilidad de un algoritmo de procesamiento de brillo de imágenes en los sistemas operativos Windows 11 y Linux (Ubuntu). Se evalúan cuatro enfoques de ejecución sobre un procesador de 4 núcleos utilizando imágenes de diferentes resoluciones (mediana, grande y muy grande): una implementación secuencial, una optimizada con SIMD (instrucciones XMM), una paralelizada con OpenMP y una solución multihilo en Python. Los resultados demuestran que el Speedup tiende a incrementarse de manera proporcional al tamaño de la imagen debido a la amortización del overhead de gestión de hilos y al aprovechamiento del paralelismo a nivel de memoria (MLP). Asimismo, se evidencia un comportamiento diferenciado entre los sistemas operativos: mientras que Linux estabiliza su aceleración desde resoluciones medianas gracias a un kernel con llamadas de sistema optimizadas y un planificador eficiente, Windows exhibe un crecimiento de Speedup más drástico y tardío, penalizado inicialmente por una mayor sobrecarga en la creación de hilos y la asignación dinámica de memoria.",
     hardware: ["env-c", "env-d"], 
   },
   {

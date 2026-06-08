@@ -18,6 +18,9 @@ const nextConfig = {
   pageExtensions: ['ts', 'tsx', 'mdx'],
   experimental: { typedRoutes: true },
   output: 'export',
+  images: {
+    unoptimized: true,
+  }
 }
 
 export default withMDX(nextConfig)
