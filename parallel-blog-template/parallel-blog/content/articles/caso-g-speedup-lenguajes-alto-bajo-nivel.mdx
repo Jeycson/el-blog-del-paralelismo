@@ -1,0 +1,113 @@
+export const metadata = {
+  toc: [
+    { id: 'introduccion',  title: 'Introducción',   level: 1 },
+    { id: 'metodologia',   title: 'Metodología',    level: 1 },
+    { id: 'configuracion', title: 'Configuración',  level: 2 },
+    { id: 'resultados',           title: 'Resultados',                level: 1 },
+    { id: 'categorizacion-tiempos', title: 'Categorización de tiempos',  level: 2 },
+    { id: 'conclusiones',  title: 'Conclusiones',   level: 1 },
+  ]
+}
+
+<h2 id="introduccion">Introducción</h2>
+
+El análisis comparativo del rendimiento entre lenguajes de programación de diferente nivel de abstracción constituye una línea de investigación fundamental en el campo de la ingeniería de software y la computación de alto rendimiento. Mientras que los lenguajes de alto nivel como Python ofrecen ventajas significativas en términos de legibilidad, velocidad de desarrollo y portabilidad gracias a su ecosistema interpretado, los lenguajes de bajo nivel como C/C++ permiten una gestión granular de los recursos del sistema, compilando directamente a código máquina nativo y posibilitando optimizaciones de hardware que impactan drásticamente en la latencia y en el factor de aceleración (Speedup).
+
+Con el auge de las herramientas de Inteligencia Artificial para la generación automática de código, se ha vuelto crítico evaluar si las optimizaciones paralelas sugeridas por modelos de lenguaje pueden mitigar las limitaciones intrínsecas de un entorno interpretado o si el rendimiento bruto sigue condicionado por la naturaleza del lenguaje.
+
+El presente reporte evalúa empíricamente el impacto del nivel de abstracción sobre el Speedup de un algoritmo de procesamiento de imágenes paralelizado. Para ello, se compara el escalamiento fuerte de la ejecución de una solución en C++ estructurada con OpenMP contra scripts homólogos en Python generados por IA corriendo con hilos variables (1, 2, 4, 8 y 16 hilos). El objetivo es cuantificar la aceleración real obtenida en cada caso sobre hardware nativo, identificar el punto de saturación por sobrecarga de hilos (Overthreading) en ambos lenguajes y contrastar las hipótesis planteadas con la evidencia experimental recolectada.
+
+
+
+<h2 id="metodologia">Metodología</h2>
+
+El diseño experimental se fundamenta en un análisis cuantitativo comparativo bajo un esquema de carga de trabajo constante, donde el tamaño de la imagen de prueba (nature_mediana.bmp) permanece invariante entre ambos entornos. La variable independiente manipulada es el número de hilos de ejecución (1, 2, 4, 8 y 16) en dos lenguajes con niveles de abstracción totalmente opuestos: C++ y Python. A partir de los tiempos de ejecución obtenidos en las pruebas locales, se calculará el Factor de Aceleración (Speedup) para evaluar la eficiencia del paralelismo. El Speedup (S_p) se define formalmente mediante la Ley de Amdahl como:
+
+<figure style={{ textBreak: 'avoid', margin: '1.5rem auto', maxWidth: '50%', textAlign: 'center' }}>
+  <img src="/resources/caseF/SpeedUpFormula.png" alt="Ecuación de SpeedUp Absoluto" style={{ width: '100%', height: 'auto', display: 'block', margin: '0 auto' }} />
+  <figcaption style={{ fontSize: '0.85rem', color: '#666', marginTop: '0.5rem' }}>
+    <strong>Ecuación 1:</strong> Relación matemática para el cálculo de SpeedUp basada en el tiempo secuencial (T₁) y el tiempo paralelo con p hilos (T_p).
+  </figcaption>
+</figure>
+
+Donde T₁ representa el tiempo de ejecución secuencial (con 1 solo hilo) y T_p representa el tiempo empleado al utilizar una configuración de p hilos en paralelo (2, 4, 8 o 16). Un valor de Speedup &gt; 1 indica una ganancia de rendimiento, mientras que un valor menor a 1 refleja una pérdida de eficiencia por sobrecarga.
+
+<h3 id="configuracion">Configuración</h3>
+
+Las pruebas se desplegaron sobre una arquitectura de hardware x86_64. El entorno de software y la configuración experimental se definieron bajo las siguientes especificaciones:
+
+* **Imagen de prueba:** Imagen mediana (`nature_mediana.bmp`).
+* **Implementaciones evaluadas:** Python (multithreading asistido por IA), OpenMP (C++) y SIMD (C++).
+* **Densidad de hilos:** Configuración variable escalada progresivamente en un rango de 1, 2, 4, 8 y 16 hilos de procesamiento.
+* **Entorno de ejecución — Windows 11 Nativo:** El programa ejecuta directamente sobre el hardware físico de la CPU.
+
+<h2 id="resultados">Resultados</h2>
+
+<h3 id="categorizacion-tiempos">Categorización de tiempos</h3>
+
+En las siguientes tablas se expone el desglose detallado del rendimiento absoluto y relativo del sistema bajo el entorno de pruebas local. Esta estructura facilita el contraste directo de cómo afecta la asignación de más hilos al factor de aceleración (*SpeedUp*) bajo una carga de trabajo constante, utilizando como matriz base la imagen `nature_mediana.bmp`.
+
+<AcademicTable
+  tableNumber={1}
+  data={{
+    caption: "Métricas de tiempo promedio de ejecución en segundos (s) para el Caso G: Variación de hilos con tamaño de imagen constante.",
+    headers: ["Configuración", "1 Hilo", "2 Hilos", "4 Hilos", "8 Hilos", "16 Hilos"],
+    rows: [
+      ["Python — Tiempo (s)",       "5.7901", "4.0001", "3.5468", "3.8782",  "6.4243"],
+      ["OpenMP (C++) — Tiempo (s)",  "0.0001", "0.7363", "0.6532", "0.6640",  "0.8609"],
+      ["SIMD (C++) — Tiempo (s)",    "0.6397", "1.9465", "5.4358", "5.6524", "17.9734"],
+    ],
+  }}
+/>
+
+Al evaluar el rendimiento neto en tiempo de ejecución, se hace evidente la abismal brecha de eficiencia entre las tecnologías compiladas nativas en C++ y el entorno interpretado de Python. Mientras que la versión secuencial pura de C++ procesa la carga de trabajo en una fracción milimétrica de segundo (0.0001 s), Python requiere de un costo computacional masivo en su configuración base (5.7901 s).
+
+Sin embargo, el comportamiento del sistema al introducir hilos expone dos fenómenos clave del hardware:
+
+**Saturación en Python:** La versión en Python logra su mejor tiempo a los 4 hilos (3.5468 s). A partir de ahí (8 y 16 hilos), el rendimiento empeora por la contención del GIL y la sobrecarga del cambio de contexto (Context Switching) en el sistema operativo.
+
+**Colapso por Overhead en C++:** Tanto OpenMP como SIMD aumentan sus tiempos drásticamente en cuanto entra el multifilamento. Como la imagen es mediana y se procesa rápido, el costo de crear, sincronizar y destruir hilos superó por completo al tiempo de cómputo real, disparando el tiempo de OpenMP a ~0.65 s y el de SIMD hasta unos 17.9734 s en 16 hilos.
+
+<AcademicTable
+  tableNumber={2}
+  data={{
+    caption: "Métricas del cálculo de aceleración relativo para el Caso G: Variación de hilos con tamaño de imagen constante.",
+    headers: ["Configuración", "1 Hilo", "2 Hilos", "4 Hilos", "8 Hilos", "16 Hilos"],
+    rows: [
+      ["Python — SpeedUp",       "1.0000", "1.4475", "1.6325", "1.4930", "0.9013"],
+      ["OpenMP (C++) — SpeedUp",  "1.0000", "0.0001", "0.0002", "0.0002", "0.0001"],
+      ["SIMD (C++) — SpeedUp",    "1.0000", "0.3286", "0.1177", "0.1132", "0.0356"],
+    ],
+  }}
+/>
+
+A partir de los tiempos de ejecución, se derivó el factor de aceleración absoluto aplicando formalmente la Ecuación 1 ya descrita en la sección de Metodología, contrastando de forma estricta el tiempo secuencial unitario de cada tecnología (T₁) frente a cada configuración de hilos paralelos (T_p). El análisis gráfico de estas métricas permite responder con rigor científico a la problemática central del estudio.
+
+<ChartContainer
+  figureNumber={1}
+  caption="Comparativa de Barras Agrupadas de SpeedUp por configuración de hilos para Python, OpenMP (C++) y SIMD (C++)."
+>
+  <img src="/resources/CaseG/grafica1_g.png" alt="Comparativa de Barras Agrupadas de SpeedUp" style={{ width: '80%', height: 'auto' }} />
+</ChartContainer>
+
+Como se observa en la comparativa de barras agrupadas, el código generado por IA en Python reporta el factor de aceleración relativo más alto de todo el experimento, registrando un pico de 1.6325× empleando 4 hilos. Por el contrario, las soluciones nativas en C++ (OpenMP y SIMD) exhiben coeficientes que caen drásticamente por debajo de la unidad de eficiencia elemental desde la primera bifurcación paralela, tocando fondos críticos de 0.0001 y 0.0356 respectivamente.
+
+<ChartContainer
+  figureNumber={2}
+  caption="Curvas de Escalabilidad Strong Scaling: trayectoria del SpeedUp relativo por número de hilos para cada implementación."
+>
+  <img src="/resources/CaseG/grafica2_g.png" alt="Curvas de Escalabilidad Strong Scaling" style={{ width: '80%', height: 'auto' }} />
+</ChartContainer>
+
+No obstante, la trayectoria mapeada en la gráfica de curvas de escalabilidad demuestra que este fenómeno se cataloga estrictamente como un "falso espejismo" de rendimiento. Al partir de un estado inicial sumamente ineficiente y lento, Python ofrece un margen de optimización masivo que permite reflejar una curva de mejora matemática superior en términos relativos.
+
+En contraste, el desplome radical en las curvas de C++ no denota una falla en el código, sino la saturación física de la arquitectura bajo un esquema de Strong Scaling (carga constante). Al estar el procesamiento completado casi de forma instantánea en un solo hilo, la fragmentación excesiva del problema en sub-bloques lógicos mediante hilos pesados destruye la aceleración del algoritmo compilado, validando que un mayor SpeedUp relativo no es sinónimo directo de un menor tiempo absoluto de ejecución.
+
+<h2 id="conclusiones">Conclusiones</h2>
+
+Con base en los datos empíricos, se valida que las hipótesis planteadas por Jairo, Jeycson, Mariana y Jeovani acertaron con precisión en el tiempo bruto, pero fallaron de forma unánime en el SpeedUp. El equipo predijo correctamente que C++ mantendría el control eficiente del hardware y los mejores tiempos netos debido a su naturaleza compilada. Sin embargo, no se anticipó el impacto crítico del Overhead bajo un esquema de Strong Scaling. Al mantener la imagen fija (`nature_mediana.bmp`), la carga asignada a cada hilo en C++ se vuelve insignificante, provocando que el sistema operativo invierta más tiempo en crear y coordinar los hilos que en procesar los píxeles, destruyendo la aceleración relativa en OpenMP y SIMD.
+
+El hallazgo analítico más destacable radica en el comportamiento de Python bajo Windows 11, que reportó el SpeedUp más alto del experimento (1.6325 con 4 hilos), superando porcentualmente a C++. Sin embargo, esto es estrictamente un "falso espejismo" de rendimiento. Al evaluar los tiempos absolutos, la ejecución base de Python con 1 hilo demostró una profunda ineficiencia (5.7901 s); por lo tanto, la reducción del tiempo a 3.5468 s con 4 hilos disparó matemáticamente el cálculo de aceleración respecto a su propio estado inicial. En tiempo real, Python permanece como la tecnología más lenta por una diferencia abismal frente a C++, donde OpenMP ejecutó siempre por debajo del segundo (0.6532 s).
+
+En conclusión, bajo una carga de trabajo invariable, el SpeedUp alcanza su punto óptimo muy temprano (4 hilos para Python) y decae drásticamente en 8 y 16 hilos (0.9013) por la contención del GIL y el Context Switching. Para OpenMP y SIMD, la penalización de la API de hilos es tan severa que ni siquiera logran registrar ganancia inicial, hundiéndose sus curvas inmediatamente (0.0001 y 0.0356). Esto demuestra empíricamente que en entornos de alto rendimiento, la fragmentación excesiva de un problema mediano no justifica el uso de paralelismo multifilamento masivo.
+

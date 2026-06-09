@@ -28,8 +28,7 @@ const mdxArticles: Record<string, any> = {
   "caso-c-comparacion-linux-virtualbox-windows11": () => import("@/content/articles/caso-c-comparacion-linux-virtualbox-windows11.mdx"),
   "caso-e-speedup-so-variacion-carga": () => import("@/content/articles/caso-e-speedup-so-variacion-carga.mdx"),
   "caso-f-speedup-sistemas-operativos": () => import("@/content/articles/caso-f-speedup-sistemas-operativos.mdx"),
-  // Agrega aquí tus otros slugs cuando crees más artículos, ej:
-  // "caso-b-optimizacion-memoria": () => import("@/content/articles/caso-b-optimizacion-memoria.mdx"),
+  "caso-g-speedup-lenguajes-alto-bajo-nivel": () => import("@/content/articles/caso-g-speedup-lenguajes-alto-bajo-nivel.mdx"),
 };
 
 export default async function ArticlePage({ params }: PageProps) {

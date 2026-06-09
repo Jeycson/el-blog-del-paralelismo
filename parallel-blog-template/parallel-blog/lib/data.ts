@@ -15,7 +15,7 @@ export const PROJECT_META = {
     { name: "Jeycson Gabriel López Hernández", role: "Estudiante Ing. Computación", photo: "/jeycson.jpg"},
     { name: "Jeovani Pacheco Rueda", role: "Estudiante Ing. Computación", photo: "/jeovani.jpg" },
     { name: "Mariana Palacios Trinidad", role: "Estudiante Ing. Computación", photo: "/mariana.jpg" },
-    { name: "Jairo Iván Hipolito Morales", role: "Estudiante Ing. Computación", photo: "/jairo.jpg" },
+    { name: "Jairo Iván Hipolito Morales", role: "Estudiante Ing. Computación", photo: "/jairo.png" },
   ],
   abstract:
     "Este proyecto documenta una serie de experimentos controlados sobre el comportamiento de aplicaciones de cómputo intensivo bajo distintos paradigmas de paralelismo: SIMD, OpenMP, hilos POSIX y CPython. Evaluamos SpeedUp, eficiencia y overhead en entornos de hardware heterogéneo, con el objetivo de establecer métricas reproducibles y recomendaciones prácticas para el diseño de software de alto rendimiento.",
@@ -106,6 +106,20 @@ export const HARDWARE_SPECS: HardwareSpec[] = [
     ram: "4.8 GBi",
     os: "Fedora Linux 44 (Workstation Edition), GNOME Version 50, Kernel Version Linux 6.17.0-20-generic",
     notes: "Ejecución virtualizada.",
+  },
+  {
+    id: "env-g",
+    name: "Entorno G — Laptop 4 (Windows)",
+    role: "laptop",
+    cpu: "Intel(R) Core(TM) i5-12450H (2.20 GHz)",
+    cores: 8,
+    threads: 12,
+    cacheL1: "704 kB",
+    cacheL2: "7.0 MB",
+    cacheL3: "12.0 MB",
+    ram: "16 GB DDR4-3200",
+    os: "Windows 11 Home, Versión 23H2, Compilación del SO 22631.3527, Nativo de 64 bits",
+    notes: "Ejecución nativa.",
   },
 ];
 
@@ -223,6 +237,24 @@ export const ARTICLES: Article[] = [
     readingTime: 12,
     abstract: "Este reporte evalúa el impacto crítico del planificador de procesos en Windows 11 frente a Linux al incrementar la densidad de hilos (de 2 a 16) bajo una carga de trabajo constante. Los resultados demuestran de forma empírica que mantener un tamaño de imagen fijo e intensivo induce pérdidas severas de eficiencia por overhead de sincronización a partir de los 4 hilos. Asimismo, se evidencia un falso espejismo de escalabilidad en entornos interpretados, donde Python bajo Linux registra un SpeedUp relativo de 1.66 debido a la profunda ineficiencia de su estado base , mientras que las implementaciones nativas en C (OpenMP y SIMD) mantienen el rendimiento absoluto óptimo por debajo del milisegundo.",
     hardware: ["env-a", "env-b"], 
+  },
+  {
+    slug: "caso-g-speedup-lenguajes-alto-bajo-nivel",
+    title: "Caso G: Análisis de Speedup y Eficiencia: C++ vs. Python",
+    subtitle: "¿Qué código reportará mejor Speedup, el generado por IA en un lenguaje de alto nivel como Python o el de la versión C/C++?",
+    category: "Análisis de Rendimiento",
+    tags: ["C++", "Python", "Speedup", "OpenMP", "SIMD"],
+    authors: [
+      {
+        name: "Jairo Iván Hipólito Morales",
+        role: "Estudiante de Ing. Computación",
+        institution: "Unistmo",
+      },
+    ],
+    date: "2026-06-08",
+    readingTime: 12,
+    abstract: "Evaluación comparativa del escalamiento fuerte y el factor de aceleración (Speedup) entre una implementación nativa en C++ administrada con OpenMP y una versión multiproceso en Python generada por IA. A través de un análisis empírico con hilos variables (1, 2, 4, 8 y 16), demostramos cómo la sobrecarga por conmutación de contextos y las limitaciones intrínsecas de los lenguajes interpretados impactan directamente en la curva de ganancia de rendimiento real sobre hardware nativo.",
+    hardware: ["env-g"],
   },
 ];
 
