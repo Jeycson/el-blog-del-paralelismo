@@ -183,24 +183,22 @@ export const ARTICLES: Article[] = [
     hardware: ["env-e", "env-f",],
   },
   {
-    slug: "caso-d-cache-misses",
-    title: "Caso D: Fallos de Caché y Localidad de Datos",
-    subtitle:
-      "Análisis de acceso a memoria con perf y Valgrind/Cachegrind en algoritmos de álgebra lineal",
-    category: "Arquitectura de Memoria",
-    tags: ["Cache", "perf", "Cachegrind", "BLAS", "Localidad"],
+    slug: "caso-d-windows-virtualbox-linux",
+    title: "Caso D: Comparación de tiempos de ejecución: Linux nativo vs Windows 11 en Virtual Box.",
+    subtitle: "¿Si Windows está ejecutándose en Virtual Box, que a su vez está instalada en Linux, cómo se espera que se comporte en los tiempos de ejecución de un sistema respecto a otro para una misma configuración de hilos y tamaño de imagen?",
+    category: "Comparación de sistemas operativos",
+    tags: ["VirtualBox", "Linux Nativo", "Windows 11", "Máquina Virtual"],
     authors: [
       {
-        name: "Jairo ",
-        role: "Estudiante de Ing. Computación",
-        institution: "Unistmo",
+        name: "Jairo Iván Hipolito Morales",
+        role: "Desarrollo e Investigación",
+        institution: "Universidad del Istmo, Campus Tehuantepec",
       },
     ],
-    date: "2025-04-22",
-    readingTime: 16,
-    abstract:
-      "Utilizamos perf stat y Cachegrind para perfilar la tasa de L1/L2/L3 cache misses en implementaciones naive vs. optimizadas de multiplicación de matrices. El tiling por bloques reduce las faltas de L3 hasta un 87%.",
-    hardware: ["env-a", "env-c"],
+    date: "2026-06-07",
+    readingTime: 13,
+    abstract: "Estudio teórico y empírico sobre la degradación drástica del rendimiento al ejecutar Windows 11 como sistema huésped dentro de VirtualBox sobre un host nativo Linux. Los datos demuestran cómo la doble capa de mediación del hipervisor de Tipo 2 y la carga de recursos de Windows disparan la latencia frente a la eficiencia y el acceso directo al hardware del entorno nativo.",
+    hardware: ["env-b"],
   },
   {
     slug: "caso-e-speedup-so-variacion-carga",

@@ -26,6 +26,7 @@ const mdxArticles: Record<string, any> = {
   "caso-a-variacion-carga": () => import("@/content/articles/caso-a-variacion-carga.mdx"),
   "caso-b-overhead-hilos": () => import("@/content/articles/caso-b-overhead-hilos.mdx"),
   "caso-c-comparacion-linux-virtualbox-windows11": () => import("@/content/articles/caso-c-comparacion-linux-virtualbox-windows11.mdx"),
+  "caso-d-windows-virtualbox-linux": () => import("@/content/articles/caso-d-windows-virtualbox-linux.mdx"),
   "caso-e-speedup-so-variacion-carga": () => import("@/content/articles/caso-e-speedup-so-variacion-carga.mdx"),
   "caso-f-speedup-sistemas-operativos": () => import("@/content/articles/caso-f-speedup-sistemas-operativos.mdx"),
   "caso-g-speedup-lenguajes-alto-bajo-nivel": () => import("@/content/articles/caso-g-speedup-lenguajes-alto-bajo-nivel.mdx"),
