@@ -1,0 +1,72 @@
+export const metadata = {
+  toc: [
+    { id: 'introduccion',  title: 'Introducción',   level: 1 },
+    { id: 'metodologia',   title: 'Metodología',    level: 1 },
+    { id: 'configuracion', title: 'Configuración',  level: 2 },
+    { id: 'resultados',         title: 'Resultados',                          level: 1 },
+    { id: 'analisis-tiempos',  title: 'Análisis de Tiempos de Ejecución',    level: 2 },
+    { id: 'conclusiones',  title: 'Conclusiones',   level: 1 },
+  ]
+}
+
+<h2 id="introduccion">Introducción</h2>
+
+En el diseño de sistemas de alto rendimiento, la infraestructura de ejecución dicta el límite físico de la eficiencia algorítmica. El presente análisis aborda un escenario de computación asimétrica para resolver una interrogante arquitectónica clave: ¿Cómo se ven afectados los tiempos de ejecución al procesar la misma imagen con la misma configuración de hilos, pero contrastando un entorno nativo (Fedora Linux) contra un entorno virtualizado (Windows 11 alojado en VirtualBox)?
+
+La ejecución de un sistema operativo huésped introduce un obstáculo técnico conocido como abstracción de hardware. Al operar bajo VirtualBox (un hipervisor de Tipo 2), Windows 11 carece de control real sobre el silicio de la CPU. Cada instrucción algorítmica y cada solicitud para instanciar o sincronizar un hilo debe atravesar obligatoriamente una doble capa de mediación: primero es procesada por el planificador interno de Windows, y posteriormente es interceptada, traducida y despachada por el kernel de Linux antes de finalmente alcanzar el procesador físico.
+
+El objetivo de esta evaluación es cuantificar empíricamente la severidad de esta penalización. A través del contraste de tiempos de ejecución, se demostrará el impacto crítico de la sobrecarga de traducción (Overhead de virtualización) y cómo el consumo masivo de recursos en segundo plano propio de Windows agrava este cuello de botella, mermando el rendimiento frente al acceso directo y sin restricciones del entorno nativo.
+
+<h2 id="metodologia">Metodología</h2>
+
+Para medir exclusivamente el impacto del hipervisor, se mantuvo una carga de trabajo constante: el tamaño de la imagen y la cantidad de hilos no cambian. La única variable a evaluar es el entorno de ejecución, contrastando el hardware puro de **Fedora Linux (Nativo)** contra la máquina virtual de **Windows 11 (VirtualBox)**.
+
+Dado que los sistemas operativos generan variaciones de tiempo por procesos en segundo plano y la latencia propia de la virtualización, se implementó un muestreo estadístico de **100 corridas consecutivas** por entorno. De estos datos se extrajeron tres métricas clave:
+
+* **Tiempo Mínimo (T_min):** El escenario ideal, con la menor interferencia posible del sistema operativo.
+* **Tiempo Promedio (T_prom):** La métrica central para evaluar el rendimiento real de cada entorno.
+* **Tiempo Máximo (T_max):** El peor escenario registrado, indispensable para evidenciar los cuellos de botella generados por la máquina virtual.
+
+<h3 id="configuracion">Configuración</h3>
+
+Las pruebas se desplegaron sobre una arquitectura de hardware x86_64. El entorno de software y la configuración experimental se definieron bajo las siguientes especificaciones:
+
+* **Imagen de prueba:** Imagen de tamaño constante (`nature_mediana.bmp`).
+* **Implementación:** Algoritmo paralelo con una cantidad fija de hilos para aislar la carga de trabajo y evaluar únicamente el impacto del sistema operativo.
+* **Entorno A — Fedora Linux Nativo (Anfitrión):** El programa se ejecuta directamente sobre el hardware físico (*bare-metal*), con acceso directo y sin restricciones al planificador de procesos del kernel de Linux.
+* **Entorno B — Windows 11 en VirtualBox (Huésped):** El sistema opera confinado bajo un hipervisor de Tipo 2 alojado sobre el Entorno A. Cada instrucción y solicitud de recursos debe ser interceptada y traducida antes de llegar a la CPU física.
+
+<h2 id="resultados">Resultados</h2>
+
+<h3 id="analisis-tiempos">Análisis de Tiempos de Ejecución y Latencia</h3>
+
+A continuación, se presenta la métrica recolectada tras someter a ambos entornos a una batería de 100 iteraciones consecutivas, procesando exactamente la misma carga de trabajo constante.
+
+<AcademicTable
+  tableNumber={1}
+  data={{
+    caption: "Comparativa de rendimiento global entre entornos: Fedora Linux Nativo vs. Windows 11 en VirtualBox.",
+    headers: ["Entorno de Cómputo", "Mejor (s)", "Promedio (s)", "Peor (s)"],
+    rows: [
+      ["Fedora Linux (Nativo)",    "0.4521", "1.1204",  "4.8950"],
+      ["Windows 11 (VirtualBox)",  "2.6431", "5.8742", "19.4512"],
+    ],
+  }}
+/>
+
+<ChartContainer
+  figureNumber={1}
+  caption="Comparativa de tiempos de ejecución (Mejor, Promedio y Peor) entre Fedora Linux Nativo y Windows 11 en VirtualBox bajo 100 iteraciones con carga constante. Los valores del eje representan el tiempo de ejecución en segundos (s)."
+>
+  <img src="/resources/CaseD/grafica1-d.png" alt="Comparativa de tiempos de ejecución Fedora vs Windows VirtualBox" style={{ width: '80%', height: 'auto' }} />
+</ChartContainer>
+
+Los datos extraídos del muestreo exponen una brecha de rendimiento masiva entre la ejecución directa sobre bare-metal y el entorno virtualizado. Al evaluar la métrica de tendencia central, el entorno de Fedora Linux Nativo completó la carga de trabajo en un tiempo promedio de 1.1204 s. En contraste absoluto, Windows 11 virtualizado requirió 5.8742 s en promedio para resolver exactamente el mismo problema. Esto representa una degradación de rendimiento superior al **500%**, atribuible exclusivamente al costo administrativo de la infraestructura de virtualización y a la carga del propio sistema operativo.
+
+Adicionalmente, el análisis de los escenarios críticos (tiempo T_max) revela la profunda inestabilidad inherente de la virtualización de un sistema operativo robusto. Mientras que el peor estancamiento de Linux Nativo se contuvo en los 4.8950 s, Windows 11 alcanzó picos de latencia extremos de hasta 19.4512 s. Este fenómeno físico demuestra cómo el overhead de traducción de VirtualBox colisiona con la arquitectura pesada de Windows; cuando los procesos en segundo plano del huésped (servicios, telemetría) demandan atención, saturan el cuello de botella del hipervisor, interrumpiendo severamente la ejecución de los hilos de procesamiento y disparando los tiempos de respuesta.
+
+<h2 id="conclusiones">Conclusiones</h2>
+
+El análisis de los datos empíricos valida de forma contundente las predicciones formuladas por Jeycson y Mariana, confirmando que la virtualización de un sistema operativo robusto genera una degradación severa en el rendimiento. La afirmación de Jeycson, anticipando tiempos notablemente peores al ejecutar Windows bajo una máquina virtual en Linux, se comprobó en la práctica. Esto respalda directamente el argumento de Mariana: la latencia inherente de la virtualización, sumada al alto consumo de recursos y procesos secundarios propios de Windows 11, resulta en un cuello de botella insostenible para el hardware.
+
+En conclusión, la brecha abismal entre el promedio de 1.12 s en Fedora Linux Nativo y los 5.87 s en Windows Virtualizado —con picos de inestabilidad de hasta 19.45 s— demuestra que el entorno bare-metal mantiene una ventaja absoluta. Confinar la ejecución dentro de un sistema huésped tan pesado obliga a la CPU a invertir más ciclos de reloj procesando el overhead del hipervisor que resolviendo el algoritmo, destruyendo por completo la eficiencia del sistema.
