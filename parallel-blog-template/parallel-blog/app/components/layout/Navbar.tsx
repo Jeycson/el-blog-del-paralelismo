@@ -18,7 +18,8 @@ export default function Navbar() {
     { href: "/#articles", label: "Artículos" },
     { href: "/#hardware", label: "Entornos" },
     { href: "/#about", label: "Equipo" },
-    { href: "/#hypothesis", label: "Hipótesis" },
+    { href: "/#hypothesis", label: "Hipótesis"},
+    { href: "/#comentarios", label: "Comentarios"},
   ] as const;
 
   return (
@@ -42,30 +43,14 @@ export default function Navbar() {
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-8">
-          <Link
-            href="/#articles"
-            className="text-[13px] tracking-wide uppercase font-medium text-slate-500 hover:text-slate-900 transition-colors duration-150"
-          >
-            Artículos
-          </Link>
-          <Link
-            href="/#hardware"
-            className="text-[13px] tracking-wide uppercase font-medium text-slate-500 hover:text-slate-900 transition-colors duration-150"
-          >
-            Entornos
-          </Link>
-          <Link
-            href="/#about"
-            className="text-[13px] tracking-wide uppercase font-medium text-slate-500 hover:text-slate-900 transition-colors duration-150"
-          >
-            Equipo
-          </Link>
-          <Link
-            href="/#hypothesis"
-            className="text-[13px] tracking-wide uppercase font-medium text-slate-500 hover:text-slate-900 transition-colors duration-150"
-          >
-            Hipótesis
-          </Link>
+          {navigationLinks.map(({ href, label }) => (        
+              <Link
+                href={href}
+                className="text-[13px] tracking-wide uppercase font-medium text-slate-500 hover:text-slate-900 transition-colors duration-150"
+              >
+                {label}
+              </Link>
+            ))}
           <a
             href={PROJECT_META.githubUrl}
             target="_blank"

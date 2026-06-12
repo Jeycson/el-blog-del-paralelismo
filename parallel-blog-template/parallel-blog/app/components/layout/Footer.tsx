@@ -8,6 +8,7 @@ export default function Footer() {
     { href: "/#hardware", label: "Entornos de hardware" },
     { href: "/#about", label: "Equipo de trabajo" },
     { href: "/#hypothesis", label: "Hipótesis de investigación" },
+    { href: "/#comentarios", label: "Comentarios"},
   ] as const;
 
   return (
