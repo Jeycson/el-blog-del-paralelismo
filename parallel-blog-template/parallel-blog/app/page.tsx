@@ -3,6 +3,7 @@ import HardwareCard from "./components/ui/HardwareCard";
 import ArticleCard from "./components/ui/ArticleCard";
 import { ARTICLES, HARDWARE_SPECS, PROJECT_META } from "@/lib/data";
 import HipotesisPage from "./hipotesis/page";
+import CommentSection from "./components/article/CommentSection";
 
 export default function HomePage() {
   return (
@@ -146,7 +147,7 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-
+              
               <div>
                 <p className="text-[10px] tracking-widest uppercase font-bold text-slate-400 mb-2">
                   Institución
@@ -164,6 +165,10 @@ export default function HomePage() {
             </div>
           </div>
         </div>
+      </section>
+      <section className="px-6 lg:px-10 max-w-7xl mx-auto py-20" id="comentarios">
+        <CommentSection pageSlug="home"
+         />
       </section>
     </>
   );
